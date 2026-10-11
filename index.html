@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#16131d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ドリームピクセル">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="ゲーム会社の社長になって社員を採用・育成する経営・育成ゲーム">
 <title>ドリームピクセルスタジオ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1713,6 +1720,8 @@ G.limit=30;
   initGame();
   loadImages();
 })();
+
+;if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 
 </script>
 </body>
