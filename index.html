@@ -202,8 +202,9 @@ const compatMark=c=>c>=1.2?'◎':c>=1.02?'○':c>=0.9?'△':'×';
 const OFFICES=[
  {n:'小さな貸しオフィス',cap:10,cost:0,rent:90000},{n:'雑居ビルのワンフロア',cap:20,cost:6000000,rent:260000},
  {n:'一棟貸しのビル',cap:40,cost:40000000,rent:800000},{n:'駅前の自社ビル',cap:70,cost:260000000,rent:2800000},
- {n:'超高層タワー',cap:120,cost:1600000000,rent:10000000}];
-const SLOTS=[1,2,2,3,4];
+ {n:'超高層タワー',cap:120,cost:1600000000,rent:10000000},
+ {n:'湾岸の本社ビル',cap:200,cost:8000000000,rent:35000000},{n:'自社キャンパス',cap:350,cost:50000000000,rent:120000000},{n:'ドリームピクセル・シティ',cap:600,cost:300000000000,rent:400000000}];
+const SLOTS=[1,2,2,3,4,5,6,8];
 const FACS=[
  {id:'plant',n:'観葉植物',d:'やる気の基準値 +2/Lv',base:80000,min:0},
  {id:'coffee',n:'コーヒーマシン',d:'疲労の蓄積 -6%/Lv',base:150000,min:0},
@@ -219,7 +220,7 @@ const FACS=[
  {id:'vip',n:'社長専用ラウンジ',d:'ハーモニー +8/Lv（ハーレム運営の味方）',base:1500000,min:1},
  {id:'spa',n:'社内スパ',d:'休暇の効果が増え、やる気 +3/Lv',base:40000000,min:3}];
 const facCost=(f,lv)=>Math.round(f.base*Math.pow(2.3,lv));
-const FAC_MAX=5;
+const FAC_MAX=8;
 
 const TYPES=[
  {n:'真面目',likes:[2,5],dis:[4]},{n:'元気',likes:[0,3],dis:[5]},{n:'クール',likes:[3,5],dis:[0]},{n:'天然',likes:[0,1],dis:[3]},
@@ -267,6 +268,12 @@ const TITLES=[
  {id:'t15',r:1,n:'ハーレム大帝',c:()=>lovers().length>=100},{id:'t16',r:1,n:'みんなの旦那様',c:()=>S.stat.groups>=20},
  {id:'t17',r:1,n:'みんなの推し',c:()=>!!(S.mile&&S.mile[10])},{id:'t18',r:1,n:'ハーレム王',c:()=>!!(S.mile&&S.mile[50])}];
 
+const WORLD=[
+ {id:'na',n:'北米',cost:3e8,min:2,m:.12,fame:60},{id:'eu',n:'欧州',cost:1e9,min:3,m:.12,fame:120},
+ {id:'as',n:'アジア',cost:3e9,min:3,m:.15,fame:200},{id:'me',n:'中東・アフリカ',cost:1e10,min:4,m:.15,fame:400},
+ {id:'sa',n:'中南米',cost:3e10,min:4,m:.15,fame:700},{id:'oc',n:'オセアニア',cost:8e10,min:5,m:.12,fame:1000},
+ {id:'gl',n:'全世界同時発売の体制',cost:3e11,min:6,m:.4,fame:3000}];
+
 /* ====== state ====== */
 const SAVE_KEY='studio-risshiden-v1';
 const PERKS=[
@@ -289,12 +296,12 @@ function newState(prev){
     pres:{plan:1,biz:1,cha:1,net:1,exp:{plan:0,biz:0,cha:0,net:0}},office:0,fac:{},staff:[],cand:[],proj:[],contracts:[],released:[],
     gexp:prev?prev.gexp:Array(8).fill(0),texp:prev?prev.texp:Array(8).fill(0),known:prev?prev.known:{},trend:{g:0,t:0,until:10},
     ach:prev?prev.ach:{},dex:prev?prev.dex:{},typeDex:prev?prev.typeDex:{},
-    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},apx:0,inv:{love:0},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
+    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},world:{},apx:0,inv:{love:0},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
     log:[],pity:0,schoolAt:-99,nextId:1,over:false,legacy:L,tutorial:true,revAll:prev?prev.revAll:0};
   return s;
 }
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
-function migrate(s){s.apx=s.apx||0;s.inv=s.inv||{love:0};s.stat.potions=s.stat.potions||0;s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
+function migrate(s){s.world=s.world||{};s.apx=s.apx||0;s.inv=s.inv||{love:0};s.stat.potions=s.stat.potions||0;s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
 function load(){try{const t=localStorage.getItem(SAVE_KEY);if(!t)return null;const s=JSON.parse(t);return s&&s.v===1?migrate(s):null}catch(e){return null}}
 const perk=id=>S.legacy.perks[id]||0;
 const fac=id=>S.fac[id]||0;
@@ -601,7 +608,7 @@ function stepSales(){
   let tot=0;
   for(const g of S.released){
     if(g.done)continue;const d=.68;const sh=(1-d)*Math.pow(d,g.age);
-    const u=Math.round(g.units*sh*(g.age===0?1:1));const rev=u*g.price*(1+.06*perk('sales')*0);
+    const u=Math.round(g.units*sh*(g.age===0?1:1));const rev=u*g.price*(1+worldMul());
     g.sold+=u;g.rev+=rev;g.age++;tot+=rev;
     if(g.age>=14||sh<.002){g.done=true}
   }
@@ -742,7 +749,7 @@ function checkAch(){
   for(const a of ACHS){
     if(S.ach[a.id])continue;
     let ok=false;try{ok=a.c()}catch(e){}
-    if(ok){S.ach[a.id]=S.week+1;if(a.r.conne)S.conne+=a.r.conne;if(a.r.money)S.money+=a.r.money;
+    if(ok){S.ach[a.id]=S.week+1;if(a.r.conne)S.conne+=a.r.conne;if(a.r.money)S.money+=a.r.money;if(a.r.love)S.inv.love=(S.inv.love||0)+a.r.love;
       logm(`実績「${a.n}」を達成！`,'hi');toast('🏆 実績「'+a.n+'」');}
   }
 }
@@ -1018,7 +1025,7 @@ function enterRoom(){
   const grp=L.slice().sort(()=>Math.random()-.5).slice(0,Math.min(8,L.length));
   const lines=grp.map(e=>`${e.name.split(' ')[1]||e.name}「${callBoss(pick(SURROUND_LINE),e,true)}」`).join('\n');
   scene({whoList:grp,hearts:Math.min(70,L.length*2+10),title:'社長室に入ると…',html:esc(`扉を開けた瞬間、恋人たちがわっと寄ってきた。\n\n${lines}${L.length>grp.length?`\n\n…ほか${L.length-grp.length}人も順番待ちをしている。`:''}`),
-    btns:[{l:'みんなに応える ♥',p:1,f:()=>{for(const e of L){bulkAff(e,2);e.mot=Math.min(100,e.mot+4)}checkAch();save();render()}}]});
+    btns:[{l:'みんなに応える ♥',p:1,f:()=>{for(const e of L){bulkAff(e,2);e.mot=Math.min(100,e.mot+4)}const k=groupPreg(L,.05);if(k)toast(`${k}人が新しい命を授かった`);checkAch();save();render()}}]});
 }
 function groupAct(kind){
   const L=lovers().filter(e=>!(e.mat>0));if(L.length<2)return toast('恋人が2人以上必要です');
@@ -1027,10 +1034,10 @@ function groupAct(kind){
   if(S.ap<1)return toast('行動力が足りません（次の週で回復）');if(!spend(cost))return;S.ap--;
   S.gcd[kind]=S.week;S.stat.groups++;
   for(const e of L){bulkAff(e,kind==='date'?3:4);e.mot=Math.min(100,e.mot+8);e.tot=(e.tot||0)+1}
-  S.hb=Math.min(30,(S.hb||0)+(kind==='date'?10:12));
+  S.hb=Math.min(30,(S.hb||0)+(kind==='date'?10:12));const kp=groupPreg(L,kind==='date'?.08:.14);
   const grp=L.slice().sort(()=>Math.random()-.5).slice(0,8);
   const body=kind==='date'?`${pick(GROUP_PLACES)}へ、恋人${L.length}人全員で出かけた。\n${pick(GROUP_LINE)}`:pick(NIGHT_GROUP);
-  scene({whoList:grp,hearts:Math.min(60,L.length*2+8),title:kind==='date'?'恋人みんなでおでかけ':'社長室でみんなで夜更かし',html:esc(`${body}\n\n（全員の好感度+${kind==='date'?3:4}・ハーモニー+${kind==='date'?10:12}）`)});
+  scene({whoList:grp,hearts:Math.min(60,L.length*2+8),title:kind==='date'?'恋人みんなでおでかけ':'社長室でみんなで夜更かし',html:esc(`${body}\n\n（全員の好感度+${kind==='date'?3:4}・ハーモニー+${kind==='date'?10:12}）${kp?`\n${kp}人が新しい命を授かった。`:''}`)});
   logm(kind==='date'?`恋人${L.length}人でおでかけした`:`恋人${L.length}人と社長室で夜更かしした`,'gd');
   checkAch();save();render();
 }
@@ -1041,7 +1048,7 @@ function sleepover(){
   const grp=L.slice().sort((a,b)=>b.aff-a.aff).slice(0,8);const cost=100000*grp.length;
   if(S.ap<2)return toast('行動力が2必要です');if(!spend(cost))return;S.ap-=2;
   S.gcd.sleep=S.week;S.stat.sleeps++;
-  let kids=0;for(const e of grp){bulkAff(e,8);e.mot=Math.min(100,e.mot+15);e.fat=0;e.tot=(e.tot||0)+1;if(canChild(e)&&Math.random()<.1){e.preg=8;kids++}}
+  let kids=0;for(const e of grp){bulkAff(e,8);e.mot=Math.min(100,e.mot+15);e.fat=0;e.tot=(e.tot||0)+1;if(canChild(e)&&Math.random()<.3){e.preg=8;kids++}}
   S.hb=Math.min(30,(S.hb||0)+15);
   scene({whoList:grp,hearts:Math.min(70,grp.length*6),title:'ハーレム専用 お泊まり会',html:esc(`${pick(SLEEPOVER)}\n\n（参加${grp.length}人の好感度+8・ハーモニー+15）${kids?`\n朝、${kids}人が幸せそうにお腹へ手を当てていた。`:''}`)});
   logm(`社長専用スイートでお泊まり会（${grp.length}人）`,'gd');checkAch();save();render();
@@ -1098,11 +1105,11 @@ function oshiStep(){
 }
 function mileStep(){
   const H=hiAff(),n=H.length;
-  for(const m of [10,30,50,100]){
+  for(const m of [10,30,50,100,150,200,300,500]){
     if(n<m||S.mile[m])continue;S.mile[m]=1;
-    const M=MILE[m];const grp=H.slice().sort((a,b)=>b.aff-a.aff).slice(0,12);
+    const M=MILE[m]||{t:`祝・${m}人の推し`,intro:`好意を寄せる女性が${m}人に達した。\n社員たちが次々と社長のもとへ集まってくる。`,lines:MILE[100].lines,outro:MILE[100].outro};const grp=H.slice().sort((a,b)=>b.aff-a.aff).slice(0,12);
     const say=grp.slice(0,6).map(e=>`${fnm(e)}「${callBoss(pick(M.lines),e,true)}」`).join('\n');
-    const gift=({10:3e6,30:3e7,50:2e8,100:1.5e9})[m]*(1+S.office);
+    const gift=({10:3e6,30:3e7,50:2e8,100:1.5e9,150:4e9,200:1e10,300:3e10,500:1e11})[m]*(1+S.office);
     scene({whoList:grp,hearts:80,title:'🎉 '+M.t,html:esc(`${M.intro}\n\n${say}\n\n${M.outro}\n\n（好感度の高い女性 ${n}人／お祝い金 ${yen(gift)}）`),
       btns:[{l:'みんなの気持ちを受け取る ♥',p:1,f:()=>{S.money+=gift;S.fame+=m;S.hb=Math.min(30,(S.hb||0)+12);for(const e of H){bulkAff(e,3);e.mot=Math.min(100,e.mot+10)}S.stat.parties++;logm(`好感度の高い女性が${m}人に！ みんなにお祝いされた`,'hi');checkAch();save();render()}}]});
   }
@@ -1120,9 +1127,9 @@ function floorAct(id){
   if(S.ap<f.ap)return toast(`行動力が${f.ap}必要です`);if(!spend(cost))return;S.ap-=f.ap;
   S.gcd[id]=S.week;S.stat.groups++;S.stat.floorActs++;
   for(const e of P){bulkAff(e,f.aff);e.mot=Math.min(100,e.mot+8);if(f.fat)e.fat=0;e.tot=(e.tot||0)+1}
-  S.hb=Math.min(30,(S.hb||0)+f.hb);
+  S.hb=Math.min(30,(S.hb||0)+f.hb);const kp=groupPreg(P,.12);
   const grp=P.slice().sort(()=>Math.random()-.5).slice(0,8);
-  scene({whoList:grp,hearts:Math.min(70,P.length*3+8),title:f.t,html:esc(`${pick(FLOOR_LINE[id])}\n\n（参加${P.length}人の好感度+${f.aff}・ハーモニー+${f.hb}）`)});
+  scene({whoList:grp,hearts:Math.min(70,P.length*3+8),title:f.t,html:esc(`${pick(FLOOR_LINE[id])}\n\n（参加${P.length}人の好感度+${f.aff}・ハーモニー+${f.hb}）${kp?`\n${kp}人が新しい命を授かった。`:''}`)});
   logm(`${f.t}（${P.length}人）`,'gd');checkAch();save();render();
 }
 
@@ -1172,29 +1179,75 @@ function usePotion(id){
   checkAch();save();render();
 }
 
+/* ====== v8: long-term expansion ====== */
+const worldMul=()=>WORLD.reduce((a,w)=>a+(S.world&&S.world[w.id]?w.m:0),0);
+function buyWorld(id){
+  const w=WORLD.find(x=>x.id===id);if(!w||S.world[id])return;
+  if(S.office<w.min)return toast('オフィス拡張で解放');if(!spend(w.cost))return;
+  S.world[id]=1;S.fame+=w.fame;logm(`${w.n}へ海外展開した！`,'hi');
+  scene({title:`🌏 ${w.n}へ展開`,html:esc(`${w.n}での販売網が整った。\n以後、すべての発売タイトルの売上が +${Math.round(w.m*100)}%。\n（知名度 +${w.fame}）`)});
+  checkAch();save();render();
+}
+(function(){
+  const A=(id,n,d,c,r,hid)=>ACHS.push({id,n,d,c,r,hid});
+  const T=(pre,vals,names,desc,cond,o)=>{o=o||{};vals.forEach((v,i)=>{const r={conne:3+i*3,money:Math.round(2e6*Math.pow(6,i))};if(o.love&&i>=o.love-1)r.love=1;A(pre+v,names[i],desc(v),()=>cond(v),r,o.hid)})};
+  T('xg',[25,50,100,200],['ベテランメーカー','量産体制','ゲーム工場','伝説のラインナップ'],v=>`ゲームを${v}本発売`,v=>S.stat.games>=v);
+  T('xh',[10,30,100],['ヒットの常連','ヒット製造機','ミリオンの代名詞'],v=>`ヒット作を${v}本`,v=>S.stat.hits>=v);
+  T('xr',[1e11,1e12,1e13],['兆への道','業界のガリバー','経済を動かす会社'],v=>`累計売上 ${yen(v)}`,v=>S.stat.rev>=v);
+  T('xf',[5000,20000,100000],['時の人','国民的スタジオ','世界の誰もが知る名前'],v=>`知名度 ${v}`,v=>S.fame>=v);
+  T('xs',[100,200,350,600],['百人の大所帯','二百人の大企業','巨大グループ','ゲーム帝国'],v=>`社員を${v}人まで増やす`,v=>S.stat.maxStaff>=v);
+  T('xl',[30,50,100,150,200,300],['ハーレムの入口','大ハーレム','ハーレム帝国','ハーレムの皇帝','永遠のハーレム','伝説のハーレム王'],v=>`恋人が${v}人`,v=>lovers().length>=v,{hid:1,love:2});
+  T('xk',[50,100,200],['賑やかな子供たち','小さな運動会','保育園が満員'],v=>`子供が合計${v}人`,v=>S.stat.kids>=v,{hid:1});
+  T('xo',[1e8,1e9,1e10],['推し活の頂点へ','貢ぎ物の山','財宝の間'],v=>`貢ぎ物の累計 ${yen(v)}`,v=>S.stat.oshi>=v,{hid:1,love:2});
+  T('xp',[1,10,50],['惚れ薬デビュー','惚れ薬コレクター','惚れ薬の調合師'],v=>`惚れ薬を${v}回使う`,v=>S.stat.potions>=v,{hid:1});
+  T('xx',[10,50],['フロアの常連','フロアの主'],v=>`専用フロアの集まりを${v}回`,v=>S.stat.floorActs>=v,{hid:1});
+  T('xy',[50,100],['みんな一緒の日々','大家族の長'],v=>`みんなで一緒のイベントを${v}回`,v=>S.stat.groups>=v,{hid:1});
+  T('xe',[5,10,20],['五年目の社長','十年選手','二十年の歴史'],v=>`${v}年目を迎える`,v=>cal().y>=v);
+  T('xw',[1,4,7],['海外進出','世界の4地域','全世界制覇'],v=>`海外展開を${v}地域`,v=>Object.keys(S.world||{}).length>=v);
+  T('xa',[5,10],['年鑑の厚み','年鑑の歴史'],v=>`ハーレム年鑑が${v}年分`,v=>S.almanac.length>=v,{hid:1});
+  T('xb',[5,6,7],['湾岸の本社','キャンパス完成','夢の都市'],v=>`オフィスを段階${v}まで拡張`,v=>S.office>=v);
+  T('xq',[100,1000,10000],['朝の常連','キスの雨','毎朝がお祭り'],v=>`朝の挨拶を${v}回受ける`,v=>(S.stat.kiss||0)>=v,{hid:1});
+  T('xm',[150,200,300,500],['百五十の想い','二百の想い','三百の想い','五百の想い'],v=>`好感度の高い女性が${v}人`,v=>!!(S.mile&&S.mile[v]),{hid:1,love:1});
+})();
+
+function groupPreg(list,p){let k=0;for(const e of list){if(canChild(e)&&Math.random()<p){e.preg=8;k++}}if(k)logm(`みんなで過ごした後、${k}人が新しい命を授かった`,'gd');return k}
+
 /* ====== portraits (user images) ====== */
+const IMG_MAX=150;
 const IMG={avail:[],src:{},mavail:[],msrc:{}};
 const rebuildImg=()=>{IMG.avail=Object.keys(IMG.src).map(Number).sort((a,b)=>a-b);IMG.mavail=Object.keys(IMG.msrc).map(Number).sort((a,b)=>a-b)};
 const tryLoad=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(true);i.onerror=()=>r(false);i.src=u});
 async function loadImages(){
   const pad=n=>String(n).padStart(3,'0');
-  const probe=pre=>Promise.all(Array.from({length:100},(_,i)=>tryLoad(pre+pad(i+1)+'.jpg').then(ok=>ok?i+1:0)));
+  const probe=pre=>Promise.all(Array.from({length:IMG_MAX},(_,i)=>tryLoad(pre+pad(i+1)+'.jpg').then(ok=>ok?i+1:0)));
   try{
     const [f,m]=await Promise.all([probe(''),probe('man')]);
     for(const n of f)if(n)IMG.src[n]=pad(n)+'.jpg';
     for(const n of m)if(n)IMG.msrc[n]='man'+pad(n)+'.jpg';
   }catch(e){}
-  rebuildImg();render();
+  rebuildImg();dedupeImgs();render();
 }
 const poolOf=e=>e.g==='F'?{av:IMG.avail,src:IMG.src}:{av:IMG.mavail,src:IMG.msrc};
+function imgUse(g,skip){const m={};for(const x of S.staff.concat(S.cand))if(x!==skip&&x.g===g&&x.img!=null)m[x.img]=(m[x.img]||0)+1;return m}
 function ensureImg(e){
   const P=poolOf(e);if(!P.av.length)return null;
   if(e.img!=null&&P.src[e.img])return P.src[e.img];
-  const used=new Set();for(const x of S.staff.concat(S.cand))if(x.g===e.g&&x.img!=null&&P.src[x.img])used.add(x.img);
-  const free=P.av.filter(n=>!used.has(n));const pool=free.length?free:P.av;
+  const use=imgUse(e.g,e);
+  let min=1e9;for(const n of P.av)min=Math.min(min,use[n]||0);
+  const pool=P.av.filter(n=>(use[n]||0)===min);
   e.img=pool[Math.floor(Math.random()*pool.length)];return P.src[e.img];
 }
-
+function dedupeImgs(){
+  if(!S)return;
+  for(const g of ['F','M']){
+    const seen=new Set();const P=g==='F'?{av:IMG.avail,src:IMG.src}:{av:IMG.mavail,src:IMG.msrc};
+    for(const e of S.staff.concat(S.cand)){
+      if(e.g!==g)continue;
+      if(e.img!=null&&(!P.src[e.img]||seen.has(e.img)))e.img=null;
+      if(e.img!=null)seen.add(e.img);
+    }
+  }
+}
 /* ====== avatar ====== */
 const HAIR=['#2b2233','#5a3a2e','#8a5a3c','#d9a05b','#e8c9a0','#c94f6d','#7a5cc9','#3d7dca','#4aa88a','#e8e8f0','#ff8fb0'];
 const EYEC=['#5b3a29','#2f6fb5','#3f9a6b','#8a4fc9','#c9493f','#2a2a3a','#c98f2f'];
@@ -1263,6 +1316,28 @@ function potionHtml(){
   <div class="sm mute" style="margin:6px 0 10px">惚れ薬 ${S.inv.love}本・好感度が高い順に表示</div>
   <div class="stack" style="gap:6px">${list.map(e=>`<button class="btn" style="text-align:left;display:flex;gap:8px;align-items:center" data-a="potionUse" data-id="${e.id}">${avatar(e,32)}<span class="grow">${esc(e.name)}</span><span class="mute sm">好感度 ${Math.round(e.aff)}</span></button>`).join('')||'<span class="mute sm">女性社員がいません。</span>'}</div>`;
 }
+function packSave(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+function parseSave(txt){
+  let t=String(txt||'').replace(/^\uFEFF/,'').trim();
+  if(!t)throw new Error('空です。書き出した文字列（またはファイルの中身）を貼り付けてください');
+  if(t[0]==='{')return JSON.parse(t);
+  t=t.replace(/[\s\u3000]+/g,'').replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/=]/g,'').replace(/=+$/,'');
+  if(t.length%4===1)throw new Error('文字が途中で切れているようです。もう一度、全体をコピーしてください');
+  while(t.length%4)t+='=';
+  return JSON.parse(decodeURIComponent(escape(atob(t))));
+}
+function importSave(txt){
+  try{
+    const s=parseSave(txt);
+    if(!s||s.v!==1||!Array.isArray(s.staff))return{ok:false,msg:'セーブデータではありません'};
+    S=migrate(s);save();G.empId=null;G.modalFn=null;SQ.length=0;sceneOpen=false;
+    return{ok:true,msg:`読み込みました（${S.staff.length}人・${calStr()}）`};
+  }catch(e){return{ok:false,msg:'読み込めません：'+(e&&e.message&&!/JSON|atob|Unexpected|string|URI|malformed|escape/i.test(e.message)?e.message:'文字が欠けているか、別のものが混ざっています。全体をコピーし直すか、ファイル保存を使ってください')}}
+}
+document.addEventListener('change',ev=>{
+  const t=ev.target;if(!t||t.id!=='saveFile'||!t.files||!t.files[0])return;
+  const rd=new FileReader();rd.onload=()=>{const r=importSave(rd.result);toast(r.msg);if(r.ok)render()};rd.readAsText(t.files[0]);t.value='';
+});
 function nl(t){return String(t).replace(/([。！？…）♡」])(?=「)/g,'$1\n')}
 function scene(o){SQ.push(o);if(!sceneOpen)nextScene()}
 /* ====== harem fx ====== */
@@ -1548,14 +1623,14 @@ function tabCorp(){
    <button class="btn primary" data-a="presAct" data-k="party">全員ランチ<small>女性社員全員の好感度UP・${yen(4000*S.staff.length)}</small></button></div></div>
   ${L.length?`<div class="card"><h3>社内の人間関係 ♥ ${L.length}人</h3><div class="sm mute">恋人は成果 +10%＋絆ボーナス。人数に上限はありません（9人目からハーモニーが少しずつ下がり、ジェラシー事件が起きることも。ラウンジ系の設備で改善）。<br>現在のハーモニー：<b class="${harmony()<70?'red':'mint'}">${harmony()}</b>${harmony()<70?'（成果が少し下がっています。ラウンジ系の設備で改善）':''}</div>
    <div class="row" style="margin-top:8px;gap:6px">${L.slice(0,24).map(e=>`<button data-a="empOpen" data-id="${e.id}" style="background:none;border:0;padding:0;cursor:pointer" title="${esc(e.name)}">${avatar(e,44)}</button>`).join('')}${L.length>24?`<span class="sm mute">ほか${L.length-24}人</span>`:''}</div></div>`:''}
-  ${groupCard()}${floorCard()}${seatCard()}${roomCard()}${tripCard()}${clubCard()}
+  ${groupCard()}${floorCard()}${seatCard()}${roomCard()}${tripCard()}${clubCard()}${worldCard()}
   <h3>設備</h3>${facs}
   <h3>研究開発 <span class="sm mute">上限なしの投資</span></h3>${RDS.map(r=>`<div class="card" style="padding:10px 12px"><div class="row sp"><div class="grow"><b>${r.n}</b> <span class="tag">Lv ${S.rd[r.id]||0}</span><div class="sm mute">${r.d}</div></div><button class="btn small" data-a="buyRD" data-id="${r.id}">${yen(rdCost(S.rd[r.id]||0))}</button></div></div>`).join('')}</div>`;
 }
 function tabRec(){
   const done=ACHS.filter(a=>S.ach[a.id]).length;
   const HID=new Set(['ch50','club','out1','out10','hr10','hr100','f10','f20','fa','f50','l1','l3','l5','l10','l20','d10','d50','gf','ty','k1','k10','k30','k100','alm1','oshi1','ml10','ml30','ml50','ml100','flr1','sur1','grp1','grp20','slp1','tier2','pty1']);
-  const ach=ACHS.map(a=>HID.has(a.id)&&!S.ach[a.id]?`<div class="card ach" style="padding:8px 12px"><div class="ic">？</div><div class="grow"><b>？？？</b><div class="sm mute">隠し実績</div></div></div>`:`<div class="card ach ${S.ach[a.id]?'done':''}" style="padding:8px 12px"><div class="ic">${S.ach[a.id]?'✓':'・'}</div><div class="grow"><b>${a.n}</b><div class="sm mute">${a.d}${a.r.conne?`　報酬:コネ+${a.r.conne}`:''}${a.r.money?`　報酬:${yen(a.r.money)}`:''}</div></div></div>`).join('');
+  const ach=ACHS.map(a=>(HID.has(a.id)||a.hid)&&!S.ach[a.id]?`<div class="card ach" style="padding:8px 12px"><div class="ic">？</div><div class="grow"><b>？？？</b><div class="sm mute">隠し実績</div></div></div>`:`<div class="card ach ${S.ach[a.id]?'done':''}" style="padding:8px 12px"><div class="ic">${S.ach[a.id]?'✓':'・'}</div><div class="grow"><b>${a.n}</b><div class="sm mute">${a.d}${a.r.conne?`　報酬:コネ+${a.r.conne}`:''}${a.r.money?`　報酬:${yen(a.r.money)}`:''}${a.r.love?'　報酬:惚れ薬':''}</div></div></div>`).join('');
   const dex=NAMED.map(n=>{const got=S.dex[n.id];const fake={seed:n.seed,g:n.g||'F',mot:got?80:50,aff:got?40:0,name:got?n.name:'？？？'};
     return`<div class="card dex ${got?'':'no'}" style="padding:8px 12px">${avatar(fake,48,{svg:1})}<div class="grow"><b>${got?esc(n.name):'？？？'}</b> <span class="tag ${n.rar===3?'ssr':'sr'}">${RAR[n.rar]}</span><div class="sm mute">${got?esc(n.bio):'ヘッドハントで出会えるかもしれない。'}</div></div></div>`}).join('');
   const types=TYPES.map((t,i)=>`<span class="tag ${S.typeDex[i]?'love':''}">${S.typeDex[i]?'✓':'・'}${t.n}</span>`).join(' ');
@@ -1572,7 +1647,7 @@ function tabRec(){
   <h3>実績 ${done}/${ACHS.length}</h3>${ach}
   <div class="card"><h3>セーブデータ</h3><div class="sm mute" style="margin-bottom:6px">この端末のブラウザに自動保存されます。別の端末へは文字列で移せます。</div>
    <textarea id="savebox" aria-label="セーブデータ" placeholder="ここに書き出し／貼り付け"></textarea>
-   <div class="row" style="margin-top:6px"><button class="btn small" data-a="exp">書き出し</button><button class="btn small" data-a="cp">コピー</button><button class="btn small" data-a="imp">読み込み</button><button class="btn small warn" data-a="${G.resetAsk?'reset':'resetAsk'}">${G.resetAsk?'本当に全消去':'最初からやり直す'}</button></div></div></div>`;
+   <div class="row" style="margin-top:6px"><button class="btn small" data-a="exp">書き出し</button><button class="btn small" data-a="cp">コピー</button><button class="btn small" data-a="imp">読み込み</button><button class="btn small" data-a="expFile">ファイル保存</button><button class="btn small" data-a="impFile">ファイル読込</button><input type="file" id="saveFile" accept=".json,.txt,application/json,text/plain" hidden><button class="btn small warn" data-a="${G.resetAsk?'reset':'resetAsk'}">${G.resetAsk?'本当に全消去':'最初からやり直す'}</button></div></div></div>`;
 }
 function chatRow(c){const e=empById(c.id);return`<div class="crow">${avatar(e,28)}<div><div class="tiny mute">${esc(fnm(e))}</div><div class="cb">${esc(c.t)}</div></div></div>`}
 function chatCard(){
@@ -1618,6 +1693,12 @@ function tripCard(){
   const left=Math.max(0,8-(S.week-S.trip));
   return`<div class="card"><h3>社員旅行</h3><div class="sm mute" style="margin-bottom:8px">全員のやる気と好感度が上がります（行動力2・8週に1回）${left?`／あと${left}週`:''}</div>
    <div class="acts">${TRIPS.map(t=>`<button class="btn" data-a="trip" data-id="${t.id}">${t.n}<small>${yen(t.per*S.staff.length)}</small></button>`).join('')}</div></div>`;
+}
+function worldCard(){
+  if(S.office<2)return'';
+  const n=Object.keys(S.world||{}).length;
+  return`<div class="card"><h3>海外展開</h3><div class="sm mute" style="margin-bottom:8px">地域ごとに販売網を広げると、発売タイトルの売上が永続的に伸びます。（現在 +${Math.round(worldMul()*100)}%／${n}/${WORLD.length}地域）</div>
+   <div class="stack" style="gap:8px">${WORLD.map(w=>{const has=S.world[w.id],lock=S.office<w.min;return`<div class="row sp"><div class="grow"><b>${w.n}</b><div class="sm mute">売上 +${Math.round(w.m*100)}%・知名度 +${w.fame}</div></div><button class="btn small" data-a="buyWorld" data-id="${w.id}" ${has||lock?'disabled':''}>${has?'展開済み':lock?'要拡張':yen(w.cost)}</button></div>`}).join('')}</div></div>`;
 }
 function clubCard(){
   if(!S.club.vol)return'';
@@ -1700,6 +1781,7 @@ document.addEventListener('click',ev=>{
     case 'seatClear':S.seats=[];save();render();break;
     case 'group':groupAct(d.k);break;
     case 'sleepover':sleepover();break;
+    case 'buyWorld':buyWorld(d.id);break;
     case 'buyRoom':buyRoom(d.id);break;
     case 'setTitle':S.titleSel=d.id||null;save();render();break;
     case 'hireF':G.hireF=!G.hireF;render();break;
@@ -1722,9 +1804,11 @@ document.addEventListener('click',ev=>{
     case 'rebornOpen':G.carry=[];showModal(rebornModal);break;
     case 'carryTog':{const i=+d.id,x=G.carry.indexOf(i);if(x>=0)G.carry.splice(x,1);else if(G.carry.length<carryCap())G.carry.push(i);else toast('引き継ぎ枠は最大'+carryCap()+'人です');renderModal();break}
     case 'rebornDo':doReborn(G.carry||[],false);break;
-    case 'exp':{const b=document.getElementById('savebox');b.value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));b.select();break}
-    case 'cp':{const b=document.getElementById('savebox');if(!b.value)b.value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));b.select();try{navigator.clipboard.writeText(b.value).then(()=>toast('コピーしました'),()=>toast('選択済みです。手動でコピーしてください'))}catch(e){toast('選択済みです。手動でコピーしてください')}break}
-    case 'imp':{const b=document.getElementById('savebox');try{const s=JSON.parse(decodeURIComponent(escape(atob(b.value.trim()))));if(s&&s.v===1){S=s;save();G.empId=null;toast('読み込みました');render()}else toast('データが正しくありません')}catch(e){toast('データが正しくありません')}break}
+    case 'exp':{const b=document.getElementById('savebox');b.value=packSave();b.select();toast(`書き出しました（${b.value.length.toLocaleString()}文字）`);break}
+    case 'cp':{const b=document.getElementById('savebox');if(!b.value)b.value=packSave();b.select();try{navigator.clipboard.writeText(b.value).then(()=>toast(`コピーしました（${b.value.length.toLocaleString()}文字）`),()=>toast('選択済みです。手動でコピーしてください'))}catch(e){toast('選択済みです。手動でコピーしてください')}break}
+    case 'imp':{const b=document.getElementById('savebox');const r=importSave(b.value);toast(r.msg);if(r.ok)render();break}
+    case 'expFile':{try{const bl=new Blob([JSON.stringify(S)],{type:'application/json'});const u=URL.createObjectURL(bl);const a=document.createElement('a');a.href=u;a.download='dream-pixel-save.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('ファイルに保存しました')}catch(e){toast('保存できませんでした')}break}
+    case 'impFile':{const i=document.getElementById('saveFile');if(i)i.click();break}
     case 'resetAsk':G.resetAsk=true;render();break;
     case 'reset':{G.resetAsk=false;try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=newState();initGame();break}
     case 'startGame':{const v=(document.getElementById('coName').value||'').trim();if(v)S.name=v.slice(0,16);closeModal();G.locked=false;save();render();break}
