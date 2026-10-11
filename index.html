@@ -127,6 +127,8 @@ textarea{min-height:90px;font-family:ui-monospace,monospace;font-size:11px}
 @keyframes pop{from{transform:scale(.4) translateY(10px);opacity:0}to{transform:none;opacity:1}}
 .bub.out{opacity:0;transition:opacity .5s}
 .whol{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+@keyframes riseAmb{0%{transform:translateY(0) scale(.7);opacity:0}15%{opacity:.4}100%{transform:translateY(-110vh) scale(1.1) rotate(10deg);opacity:0}}
+.fh.amb{animation-name:riseAmb;filter:none}
 @media (prefers-reduced-motion:reduce){.fh{display:none}.bub{animation:none}}
 :root[data-tier="1"] .hud{box-shadow:0 2px 14px rgba(255,120,170,.18)}
 :root[data-tier="2"] .hud{background-image:linear-gradient(90deg,rgba(255,120,170,.14),transparent);box-shadow:0 2px 16px rgba(255,120,170,.28)}
@@ -160,6 +162,7 @@ const SWEET=_M.SWEET||['社長、大好きです♡'],LEAVE_LINE=_M.LEAVE_LINE||
 const CHAT_BOSS=_M.CHAT_BOSS||['今日の社長、かっこよかったね♡'],CHAT_PAIR=_M.CHAT_PAIR||['{b}ちゃん、今度ごはん行こうね'],CHAT_SEAT=_M.CHAT_SEAT||['今週は社長の隣の席でした！'],CHAT_OSHI=_M.CHAT_OSHI||['推し活、がんばってます！'],OSHI_ITEM=_M.OSHI_ITEM||['手作りのお弁当','高級なコーヒー豆'],OSHI_LINE=_M.OSHI_LINE||['推し活です！ 受け取ってください。（{item}）'];
 const MILE=_M.MILE||{10:{t:'祝・10人の推し',intro:'好意を寄せる女性が10人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},30:{t:'祝・30人の推し',intro:'好意を寄せる女性が30人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},50:{t:'祝・50人の推し',intro:'好意を寄せる女性が50人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},100:{t:'祝・100人の推し',intro:'好意を寄せる女性が100人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'}};
 const FLOOR_LINE=_M.FLOOR_LINE||{fl1:['みんなでお茶会を開いた。'],fl2:['みんなで大浴場でくつろいだ。（暗転）'],fl3:['みんなで庭園でピクニックをした。'],fl4:['みんなで舞踏会を楽しんだ。']};
+const OSHI_ACT=_M.OSHI_ACT||['{n}は照れながら、贈り物を差し出した。'],ALMANAC_NOTE=_M.ALMANAC_NOTE||['今年も賑やかな一年だった。'];
 'use strict';
 /* ====== utils ====== */
 const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -278,12 +281,12 @@ function newState(prev){
     pres:{plan:1,biz:1,cha:1,net:1,exp:{plan:0,biz:0,cha:0,net:0}},office:0,fac:{},staff:[],cand:[],proj:[],contracts:[],released:[],
     gexp:prev?prev.gexp:Array(8).fill(0),texp:prev?prev.texp:Array(8).fill(0),known:prev?prev.known:{},trend:{g:0,t:0,until:10},
     ach:prev?prev.ach:{},dex:prev?prev.dex:{},typeDex:prev?prev.typeDex:{},
-    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
+    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
     log:[],pity:0,schoolAt:-99,nextId:1,over:false,legacy:L,tutorial:true,revAll:prev?prev.revAll:0};
   return s;
 }
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
-function migrate(s){s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
+function migrate(s){s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
 function load(){try{const t=localStorage.getItem(SAVE_KEY);if(!t)return null;const s=JSON.parse(t);return s&&s.v===1?migrate(s):null}catch(e){return null}}
 const perk=id=>S.legacy.perks[id]||0;
 const fac=id=>S.fac[id]||0;
@@ -723,6 +726,7 @@ const ACHS=[
  {id:'ml50',n:'50人の推し',d:'好感度の高い女性が50人',c:()=>!!S.mile[50],r:{conne:10}},
  {id:'ml100',n:'100人の推し',d:'好感度の高い女性が100人',c:()=>!!S.mile[100],r:{conne:20}},
  {id:'flr1',n:'専用フロアの夜',d:'社長専用フロアで集まりを開く',c:()=>S.stat.floorActs>=1,r:{conne:4}},
+ {id:'alm1',n:'ハーレム年鑑',d:'ハーレム年鑑がはじめて作られる',c:()=>S.almanac.length>=1,r:{conne:3}},
  {id:'tier2',n:'愛に包まれた社内',d:'恋人が20人',c:()=>lovers().length>=20,r:{conne:6}},
  {id:'ct',n:'下請けの鬼',d:'受託案件を10件完了',c:()=>S.stat.contracts>=10,r:{conne:2}},
  {id:'rb',n:'二周目の社長',d:'再起業を経験',c:()=>S.legacy.runs>=1,r:{conne:3}}];
@@ -828,7 +832,7 @@ function nextWeek(){
     if(e.mat>0){e.leave=true;e.mat--}
     if(e.preg>0){e.preg--;if(e.preg===0){const n=Math.random()<.08?2:1;e.kids=(e.kids||0)+n;S.stat.kids+=n;e.mat=Math.max(1,3-fac('nursery'));e.leave=true;e.mot=Math.min(100,e.mot+15);births.push({e,n})}}
     if(e.inv&&S.week-e.invW>=2)e.inv=null;
-    if(e.g==='F'&&e.aff>=STAGES[4]&&!e.inv&&Math.random()<(e.lover?.35:.25)*(1+Math.min(1,LN*.02))){e.inv=pick(canChild(e)?['lunch','date','night','night']:['lunch','date']);e.invW=S.week+1}
+    if(e.g==='F'&&e.aff>=STAGES[3]&&!e.inv&&Math.random()<Math.min(.95,(e.lover?.8:e.aff>=STAGES[4]?.55:.3)*(1+Math.min(.5,LN*.02)))){e.inv=pick(canChild(e)?['lunch','date','date','night','night','night']:['lunch','date','date']);e.invW=S.week+1}
   }
   if(births.length<=2)for(const b of births)scene({who:b.e,title:'新しい命',html:esc(`${b.e.name.split(' ')[1]||b.e.name}が元気な赤ちゃん${b.n===2?'（双子！）':''}を出産した。\n母子ともに健康。しばらく産休に入る。`)});
   else scene({title:'ベビーラッシュ',html:`今週は ${births.length}人が出産した。\n新しい命 <b class="rose">${births.reduce((a,b)=>a+b.n,0)}人</b> が誕生！\n社内が一気に賑やかになった。`});
@@ -850,7 +854,7 @@ function nextWeek(){
   seasonal();
   outsiderRoll();
   seatStep();oshiStep();chatStep();mileStep();
-  if(S.week%48===0)awards();
+  if(S.week%48===0){awards();almanac()}
   rollEvent();
   checkAch();
   if(S.money<-(3000000*(1+S.office*3))){S.over=true;G.auto=false;gameOver()}
@@ -863,7 +867,7 @@ function morningGreet(){
   el.forEach((e,i)=>{
     const t=e.aff>=78?2:e.aff>=62?1:0;const nm=e.name.split(' ')[1]||e.name;
     const text=KISS_ACT[t].replace('{n}',nm)+KISS_LINE[e.type];
-    bulkAff(e,.4);e.mot=Math.min(100,e.mot+2);
+    bulkAff(e,.4);e.mot=Math.min(100,e.mot+2);S.stat.kiss=(S.stat.kiss||0)+1;
     if(i<5)S.greet.push({id:e.id,text});
     if(!G.auto)scene({who:e,greet:true,title:`💋 朝の挨拶（${i+1}/${el.length}）`,html:esc(text),
       btns:[{l:'次へ',p:1,f:()=>{}},...(i<el.length-1?[{l:'残りの挨拶をスキップ',f:skipGreet}]:[])]});
@@ -996,7 +1000,7 @@ function balanceStep(){
     if(top.tot>=8&&top.tot>=avg*2.5){logm(`噂：「社長は${top.name.split(' ')[1]||top.name}さんばかり…」と社内でささやかれている`,'bd');S.hb=Math.max(-20,(S.hb||0)-8);for(const e of L)if(e!==top)e.mot=Math.max(0,e.mot-4)}
     else if(top.tot>=6&&top.tot<=avg*1.6){logm('評判：「社長は誰にでも公平で優しい」と社内で評判だ','gd');S.hb=Math.min(30,(S.hb||0)+5)}
   }
-  for(const e of S.staff)e.tot=Math.floor((e.tot||0)*.6);
+  for(const e of S.staff){e.yr=(e.yr||0)+(e.tot||0);e.tot=Math.floor((e.tot||0)*.6)}
 }
 function enterRoom(){
   const L=lovers().filter(e=>!(e.mat>0));
@@ -1064,19 +1068,25 @@ function seatStep(){
   if(S.room.items.fl2)for(const e of S.staff)e.fat=Math.max(0,e.fat-3);
   if(S.room.items.fl3)S.fame+=1+S.office;
 }
+const skipGift=()=>{SQ=SQ.filter(o=>!o.gift)};
 function oshiStep(){
-  const D=hiAff().filter(e=>!(e.mat>0));if(!D.length)return;
-  const base=30000*(1+S.office*1.5)*(S.room.items.fl4?1.3:1);let tot=0,n=0;const items=[];
+  const D=hiAff().filter(e=>!(e.mat>0)).sort(()=>Math.random()-.5);if(!D.length)return;
+  const base=20000*(1+S.office*1.5)*(S.room.items.fl4?1.3:1);const gifts=[];
   for(const e of D){
-    const p=.06+(e.aff-62)/38*.10+(e.lover?.04:0);if(Math.random()>p)continue;
+    const p=(e.lover?.7:.5)+(e.aff-62)/38*.2;if(Math.random()>Math.min(.95,p))continue;
     const amt=Math.max(1000,Math.round(base*R(.6,1.6)*(e.aff>=78?1.5:1)/1000)*1000);
-    tot+=amt;n++;items.push({e,text:callBoss(pick(OSHI_LINE).replace('{item}',pick(OSHI_ITEM)),e,true)});
-    if(Math.random()<.25)chatAdd(e,callBoss(pick(CHAT_OSHI),e,true));
+    gifts.push({e,amt,item:pick(OSHI_ITEM)});
+    if(Math.random()<.2)chatAdd(e,callBoss(pick(CHAT_OSHI),e,true));
   }
-  if(!n)return;
-  S.money+=tot;S.stat.oshi+=tot;S.stat.oshiN+=n;
-  logm(`推し活：${n}人から ${yen(tot)} 相当の貢ぎ物が届いた`,'gd');
-  pushFx({label:'推し活',hearts:Math.min(40,n*2+4),ms:3400,items:items.slice(0,10)});
+  if(!gifts.length)return;
+  const tot=gifts.reduce((a,g)=>a+g.amt,0);
+  S.money+=tot;S.stat.oshi+=tot;S.stat.oshiN+=gifts.length;
+  logm(`貢ぎ物：${gifts.length}人から ${yen(tot)} 相当の贈り物が届いた`,'gd');
+  if(!G.auto)gifts.forEach((g,i)=>{const e=g.e;
+    const act=pick(OSHI_ACT).replace(/\{n\}/g,fnm(e));
+    scene({who:e,gift:true,hearts:8+Math.min(20,gifts.length),title:`🎁 貢ぎ物（${i+1}/${gifts.length}）`,
+      html:esc(`${act}\n${callBoss(pick(OSHI_LINE).replace('{item}',g.item),e,true)}\n\n（${yen(g.amt)}相当・資金に加算）`),
+      btns:[{l:'受け取る ♥',p:1,f:()=>{}},...(i<gifts.length-1?[{l:'残りの貢ぎ物をスキップ',f:skipGift}]:[])]})});
 }
 function mileStep(){
   const H=hiAff(),n=H.length;
@@ -1106,6 +1116,25 @@ function floorAct(id){
   const grp=P.slice().sort(()=>Math.random()-.5).slice(0,8);
   scene({whoList:grp,hearts:Math.min(70,P.length*3+8),title:f.t,html:esc(`${pick(FLOOR_LINE[id])}\n\n（参加${P.length}人の好感度+${f.aff}・ハーモニー+${f.hb}）`)});
   logm(`${f.t}（${P.length}人）`,'gd');checkAch();save();render();
+}
+
+/* ====== v6: almanac ====== */
+function statSnap(){const t=S.stat;return{kiss:t.kiss||0,oshi:t.oshi||0,oshiN:t.oshiN||0,kids:t.kids||0,heart:t.heart||0,groups:t.groups||0,dates:t.dates||0,lovers:lovers().length,hi:hiAff().length}}
+function almanac(){
+  const n=statSnap(),b=S.yrBase||{kiss:0,oshi:0,oshiN:0,kids:0,heart:0,groups:0,dates:0,lovers:0,hi:0};
+  S.yrBase=n;
+  if(!n.lovers&&!n.hi)return;
+  const y=cal().y-1;
+  const F=S.staff.filter(e=>e.g==='F');const fav=F.slice().sort((a,b)=>((b.yr||0)+(b.tot||0))-((a.yr||0)+(a.tot||0)))[0];
+  const rec={y,lovers:n.lovers,dl:n.lovers-b.lovers,hi:n.hi,kiss:n.kiss-b.kiss,heart:n.heart-b.heart,groups:n.groups-b.groups,kids:n.kids-b.kids,oshi:n.oshi-b.oshi,oshiN:n.oshiN-b.oshiN,fav:fav?fav.name:'',favId:fav?fav.id:0,note:pick(ALMANAC_NOTE)};
+  S.almanac.unshift(rec);if(S.almanac.length>40)S.almanac.length=40;
+  for(const e of S.staff)e.yr=0;
+  const grp=F.slice().sort((a,b)=>b.aff-a.aff).slice(0,8);
+  scene({whoList:grp,hearts:Math.min(60,n.lovers*2+10),title:`📖 ハーレム年鑑 ${y}年目`,html:esc(almText(rec))});
+  logm(`ハーレム年鑑 ${y}年目が出来上がった`,'hi');
+}
+function almText(r){
+  return `恋人 ${r.lovers}人（${r.dl>=0?'+':''}${r.dl}）／好感度の高い女性 ${r.hi}人\n朝のキス ${r.kiss}回・ふたりの時間 ${r.heart}回・みんなで一緒 ${r.groups}回\n子供の誕生 ${r.kids}人・貢ぎ物 ${yen(r.oshi)}（${r.oshiN}回）${r.fav?`\n今年の寵愛No.1：${r.fav}`:''}\n\n${r.note}`;
 }
 
 /* ====== portraits (user images) ====== */
@@ -1205,6 +1234,17 @@ function bubblesFx(items,ms){
   setTimeout(()=>{el.querySelectorAll('.bub').forEach(b=>b.classList.add('out'))},ms-500);
   setTimeout(()=>{el.innerHTML=''},ms);
 }
+G.amb=true;try{G.amb=localStorage.getItem('dps-amb')!=='0'}catch(e){}
+function ambLevel(){const L=lovers().length;return L>=100?6:L>=50?5:L>=30?4:L>=20?3:L>=10?2:L>=3?1:0}
+function ambHearts(){
+  if(!G.amb||REDUCED||document.hidden||!S)return;const lv=ambLevel();if(!lv)return;
+  const el=document.getElementById('fx');if(!el||el.children.length>90)return;
+  const n=[0,1,2,3,5,8,12][lv],ch=lv>=4?['💗','💕','💖','✨','💞','🌸']:['💗','💕','♥','💖'];
+  for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fh amb';s.textContent=ch[Math.floor(Math.random()*ch.length)];
+    s.style.left=(Math.random()*96)+'%';s.style.fontSize=(10+Math.random()*(8+lv*3))+'px';const d=5+Math.random()*4;
+    s.style.animationDuration=d+'s';s.style.animationDelay=(Math.random()*1.2)+'s';el.appendChild(s);setTimeout(()=>s.remove(),(d+1.6)*1000)}
+}
+setInterval(ambHearts,1500);
 const FXQ=[];
 function pushFx(b){FXQ.push(b)}
 function flushFx(){
@@ -1320,7 +1360,8 @@ function tabHome(){
   const pj=S.proj.map(projCard).join('')||`<div class="card mute sm">開発中のプロジェクトはありません。<a href="#" data-a="tab" data-t="dev" class="rose">開発タブ</a>から始めよう。</div>`;
   const r=recs();
   const tm=tierOf()>=1&&TIER_MOOD[tierOf()]?`<div class="card hl sm">${esc(TIER_MOOD[tierOf()])}</div>`:'';
-  return`<div class="stack">${t}${tm}${greetCard()}${invCard()}${chatCard()}
+  const top=`<div class="row sp"><button class="btn small" data-a="cheat">＋1000万円</button><button class="btn small" data-a="ambToggle" aria-pressed="${G.amb}">背景演出：${G.amb?'ON':'OFF'}</button></div>`;
+  return`<div class="stack">${top}${t}${tm}${greetCard()}${invCard()}${chatCard()}
   <div class="card"><h3>今週のひとこと</h3><div class="sm" style="display:grid;gap:3px">${r.length?r.map(x=>`<div>・${esc(x)}</div>`).join(''):'<div class="mute">やることは一通り済んでいます。次の週へ進みましょう。</div>'}</div></div>
   <h2>開発中</h2>${pj}
   <div class="card"><div class="row sp"><h3 style="margin:0">市場の流行</h3><span class="chip">${GENRES[S.trend.g].n}×${THEMES[S.trend.t]}</span></div>
@@ -1465,14 +1506,15 @@ function tabCorp(){
 }
 function tabRec(){
   const done=ACHS.filter(a=>S.ach[a.id]).length;
-  const HID=new Set(['ch50','club','out1','out10','hr10','hr100','f10','f20','fa','f50','l1','l3','l5','l10','l20','d10','d50','gf','ty','k1','k10','k30','k100','oshi1','ml10','ml30','ml50','ml100','flr1','sur1','grp1','grp20','slp1','tier2','pty1']);
+  const HID=new Set(['ch50','club','out1','out10','hr10','hr100','f10','f20','fa','f50','l1','l3','l5','l10','l20','d10','d50','gf','ty','k1','k10','k30','k100','alm1','oshi1','ml10','ml30','ml50','ml100','flr1','sur1','grp1','grp20','slp1','tier2','pty1']);
   const ach=ACHS.map(a=>HID.has(a.id)&&!S.ach[a.id]?`<div class="card ach" style="padding:8px 12px"><div class="ic">？</div><div class="grow"><b>？？？</b><div class="sm mute">隠し実績</div></div></div>`:`<div class="card ach ${S.ach[a.id]?'done':''}" style="padding:8px 12px"><div class="ic">${S.ach[a.id]?'✓':'・'}</div><div class="grow"><b>${a.n}</b><div class="sm mute">${a.d}${a.r.conne?`　報酬:コネ+${a.r.conne}`:''}${a.r.money?`　報酬:${yen(a.r.money)}`:''}</div></div></div>`).join('');
   const dex=NAMED.map(n=>{const got=S.dex[n.id];const fake={seed:n.seed,g:n.g||'F',mot:got?80:50,aff:got?40:0,name:got?n.name:'？？？'};
     return`<div class="card dex ${got?'':'no'}" style="padding:8px 12px">${avatar(fake,48,{svg:1})}<div class="grow"><b>${got?esc(n.name):'？？？'}</b> <span class="tag ${n.rar===3?'ssr':'sr'}">${RAR[n.rar]}</span><div class="sm mute">${got?esc(n.bio):'ヘッドハントで出会えるかもしれない。'}</div></div></div>`}).join('');
   const types=TYPES.map((t,i)=>`<span class="tag ${S.typeDex[i]?'love':''}">${S.typeDex[i]?'✓':'・'}${t.n}</span>`).join(' ');
   const L=S.legacy;
   const perks=PERKS.map(p=>{const l=perk(p.id),mx=l>=p.max;return`<div class="card" style="padding:8px 12px"><div class="row sp"><div class="grow"><b>${p.n}</b> <span class="tag">Lv ${l}/${p.max}</span><div class="sm mute">${p.d}</div></div><button class="btn small" data-a="perk" data-id="${p.id}" ${mx?'disabled':''}>${mx?'MAX':p.c(l)+'pt'}</button></div></div>`}).join('');
-  return`<h2>記録</h2><div class="stack">
+  const alm=S.almanac&&S.almanac.length?`<div class="card"><div class="row sp"><div><h3 style="margin:0">📖 ハーレム年鑑</h3><div class="sm mute">${S.almanac.length}年分の記録</div></div><button class="btn small" data-a="almOpen">開く</button></div></div>`:'';
+  return`<h2>記録</h2><div class="stack">${alm}
   <div class="card"><h3>これまで</h3><div class="kv"><span>発売本数</span><span>${S.stat.games}本（ヒット ${S.stat.hits}本）</span><span>最高スコア</span><span>${S.stat.best.toFixed(1)}</span><span>累計売上</span><span>${yen(S.stat.rev)}</span><span>知名度 / ファン</span><span>${num(S.fame)} / ${num(S.fans)}人</span><span>子供</span><span>${kidsTotal()}人</span><span>経過</span><span>${calStr()}（${S.week}週）</span><span>再起業</span><span>${L.runs}回</span></div></div>
   <div class="card ${canReborn()?'hl':''}"><div class="row sp"><div><h3 style="margin:0">再起業（転生）</h3><div class="sm mute">累計売上2億円 または 知名度300 で解放。<br>獲得予定：<b class="amber">${legacyGain()} pt</b>（所持 ${L.pts} pt）</div></div>
    <button class="btn primary" data-a="rebornOpen" ${canReborn()?'':'disabled'}>会社を売却</button></div></div>
@@ -1598,6 +1640,9 @@ document.addEventListener('click',ev=>{
     case 'trip':doTrip(d.id);break;
     case 'enterRoom':enterRoom();break;
     case 'floorAct':floorAct(d.id);break;
+    case 'cheat':S.money+=10000000;save();render();toast('＋1000万円');break;
+    case 'ambToggle':G.amb=!G.amb;try{localStorage.setItem('dps-amb',G.amb?'1':'0')}catch(e){}render();break;
+    case 'almOpen':showModal(()=>`<div class="row sp"><h2 style="margin:0">📖 ハーレム年鑑</h2><button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div><div class="stack" style="margin-top:10px">${S.almanac.map(r=>`<div class="card"><h3>${r.y}年目</h3><div class="sm" style="white-space:pre-wrap">${esc(almText(r))}</div></div>`).join('')}</div>`);break;
     case 'chatAll':showModal(()=>`<div class="row sp"><h2 style="margin:0">💬 社内チャット</h2><button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div><div class="chat" style="margin-top:10px">${S.chat.filter(c=>empById(c.id)).slice(0,60).reverse().map(chatRow).join('')||'<span class="mute sm">まだ会話がありません。</span>'}</div>`);break;
     case 'seatAuto':{const sm=seatMax();S.seats=S.staff.filter(e=>e.g==='F').sort((a,b)=>b.aff-a.aff).slice(0,sm).map(e=>e.id);save();render();break}
     case 'seatClear':S.seats=[];save();render();break;
