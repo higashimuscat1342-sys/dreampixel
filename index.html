@@ -170,6 +170,7 @@ const CHAT_BOSS=_M.CHAT_BOSS||['今日の社長、かっこよかったね♡'],
 const MILE=_M.MILE||{10:{t:'祝・10人の推し',intro:'好意を寄せる女性が10人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},30:{t:'祝・30人の推し',intro:'好意を寄せる女性が30人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},50:{t:'祝・50人の推し',intro:'好意を寄せる女性が50人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},100:{t:'祝・100人の推し',intro:'好意を寄せる女性が100人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'}};
 const FLOOR_LINE=_M.FLOOR_LINE||{fl1:['みんなでお茶会を開いた。'],fl2:['みんなで大浴場でくつろいだ。（暗転）'],fl3:['みんなで庭園でピクニックをした。'],fl4:['みんなで舞踏会を楽しんだ。']};
 const OSHI_ACT=_M.OSHI_ACT||['{n}は照れながら、贈り物を差し出した。'],ALMANAC_NOTE=_M.ALMANAC_NOTE||['今年も賑やかな一年だった。'];
+const POTION_LINE=_M.POTION_LINE||['{n}は潤んだ瞳であなたを見つめている。\n「…社長のことしか、考えられません」'];
 'use strict';
 /* ====== utils ====== */
 const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -288,12 +289,12 @@ function newState(prev){
     pres:{plan:1,biz:1,cha:1,net:1,exp:{plan:0,biz:0,cha:0,net:0}},office:0,fac:{},staff:[],cand:[],proj:[],contracts:[],released:[],
     gexp:prev?prev.gexp:Array(8).fill(0),texp:prev?prev.texp:Array(8).fill(0),known:prev?prev.known:{},trend:{g:0,t:0,until:10},
     ach:prev?prev.ach:{},dex:prev?prev.dex:{},typeDex:prev?prev.typeDex:{},
-    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
+    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},apx:0,inv:{love:0},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
     log:[],pity:0,schoolAt:-99,nextId:1,over:false,legacy:L,tutorial:true,revAll:prev?prev.revAll:0};
   return s;
 }
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
-function migrate(s){s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
+function migrate(s){s.apx=s.apx||0;s.inv=s.inv||{love:0};s.stat.potions=s.stat.potions||0;s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
 function load(){try{const t=localStorage.getItem(SAVE_KEY);if(!t)return null;const s=JSON.parse(t);return s&&s.v===1?migrate(s):null}catch(e){return null}}
 const perk=id=>S.legacy.perks[id]||0;
 const fac=id=>S.fac[id]||0;
@@ -303,7 +304,7 @@ const calStr=w=>{const c=cal(w);return`${c.y}年目 ${c.mo}月 第${c.wk}週`};
 
 /* ====== employees ====== */
 const lovers=()=>S.staff.filter(e=>e.lover);
-const apMax=()=>3+Math.min(2,perk('ap'))+(S.room&&S.room.items.sec&&S.sec&&empById(S.sec)?1:0);
+const apMax=()=>3+(S.apx||0)+Math.min(2,perk('ap'))+(S.room&&S.room.items.sec&&S.sec&&empById(S.sec)?1:0);
 function harmony(){const L=lovers().length;let h=100-Math.max(0,L-8)*2+fac('lounge')*4+fac('vip')*8+(S.room&&S.room.items.fl1?3:0)+(S.room&&S.room.items.fl2?3:0);for(const e of S.staff)for(const t of e.tr)h+=TRAITS[t].harm||0;return clamp(h+(S.hb||0),30,100)}
 const effStat=(e,k)=>{let v=e.s[k];for(const t of e.tr){const b=TRAITS[t].b;if(b)v+=b[k]}return v};
 const statTotal=e=>[0,1,2,3,4].reduce((a,k)=>a+effStat(e,k),0);
@@ -1144,6 +1145,33 @@ function almText(r){
   return `恋人 ${r.lovers}人（${r.dl>=0?'+':''}${r.dl}）／好感度の高い女性 ${r.hi}人\n朝のキス ${r.kiss}回・ふたりの時間 ${r.heart}回・みんなで一緒 ${r.groups}回\n子供の誕生 ${r.kids}人・貢ぎ物 ${yen(r.oshi)}（${r.oshiN}回）${r.fav?`\n今年の寵愛No.1：${r.fav}`:''}\n\n${r.note}`;
 }
 
+/* ====== v7: shop ====== */
+const SHOP=[
+ {id:'drink1',n:'🥤 エナジードリンク',d:'今週の行動力 +1',cost:()=>400000*(1+S.office)},
+ {id:'drink3',n:'🍹 特製ドリンクセット',d:'今週の行動力 +3',cost:()=>1000000*(1+S.office)},
+ {id:'notebook',n:'📒 社長の手帳',d:'毎週の行動力の上限が永久に +1（最大 +3）',cost:()=>[15e6,50e6,150e6][S.apx||0]||0,maxed:()=>(S.apx||0)>=3},
+ {id:'box',n:'🎁 差し入れボックス',d:'全員のやる気 +15・疲労を全回復',cost:()=>200000*Math.max(1,S.staff.length)},
+ {id:'love',n:'💘 惚れ薬',d:'好感度を一瞬で MAX にする（女性社員1人に使用）',cost:()=>5000000*(1+S.office)}];
+function shopBuy(id){
+  const it=SHOP.find(x=>x.id===id);if(!it||(it.maxed&&it.maxed()))return;
+  const c=it.cost();if(!spend(c))return;
+  if(id==='drink1'){S.ap+=1;toast('行動力 +1')}
+  else if(id==='drink3'){S.ap+=3;toast('行動力 +3')}
+  else if(id==='notebook'){S.apx=(S.apx||0)+1;S.ap+=1;toast('行動力の上限が+1になった')}
+  else if(id==='box'){for(const e of S.staff){e.mot=Math.min(100,e.mot+15);e.fat=0}toast('みんなが元気になった')}
+  else if(id==='love'){S.inv.love=(S.inv.love||0)+1;toast('惚れ薬を手に入れた')}
+  save();render();
+}
+function usePotion(id){
+  const e=empById(id);if(!e||e.g!=='F'||!(S.inv.love>0))return;
+  S.inv.love--;S.stat.potions=(S.stat.potions||0)+1;
+  const was=e.lover;e.aff=100;e.seen=5;e.last=S.week;e.mot=Math.min(100,e.mot+20);
+  if(!was){e.lover=true;S.stat.lovers=Math.max(S.stat.lovers,lovers().length);logm(`${e.name} と特別な関係になった ♥`,'hi')}
+  logm(`惚れ薬を使った（${e.name}）`,'gd');
+  scene({who:e,hearts:30,title:'💘 惚れ薬',html:esc(`${pick(POTION_LINE).replace(/\{n\}/g,fnm(e))}\n\n（好感度が MAX になった）`)});
+  checkAch();save();render();
+}
+
 /* ====== portraits (user images) ====== */
 const IMG={avail:[],src:{},mavail:[],msrc:{}};
 const rebuildImg=()=>{IMG.avail=Object.keys(IMG.src).map(Number).sort((a,b)=>a-b);IMG.mavail=Object.keys(IMG.msrc).map(Number).sort((a,b)=>a-b)};
@@ -1223,6 +1251,19 @@ const projName=id=>{const p=S.proj.find(x=>x.id===id);return p?p.title:null};
 /* ====== modal / scene / toast ====== */
 let SQ=[],sceneOpen=false,curScene=null,toastT=null;
 function toast(t){const el=document.getElementById('toast');el.innerHTML=`<div class="toast">${esc(t)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>{el.innerHTML=''},2200)}
+function shopHtml(){
+  return`<div class="row sp"><h2 style="margin:0">🛒 ショップ</h2><button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div>
+  <div class="sm mute" style="margin:6px 0 10px">所持金 <b>${yen(S.money)}</b>${S.inv.love?`　惚れ薬 <b class="rose">${S.inv.love}本</b>`:''}</div>
+  <div class="stack" style="gap:8px">${SHOP.map(x=>{const mx=x.maxed&&x.maxed();return`<div class="card" style="padding:10px 12px"><div class="row sp"><div class="grow"><b>${x.n}</b><div class="sm mute">${x.d}</div></div>
+   <span class="row" style="gap:6px">${x.id==='love'&&S.inv.love?'<button class="btn small primary" data-a="potionPick">使う</button>':''}<button class="btn small" data-a="shopBuy" data-id="${x.id}" ${mx?'disabled':''}>${mx?'MAX':yen(x.cost())}</button></span></div></div>`}).join('')}</div>`;
+}
+function potionHtml(){
+  const list=S.staff.filter(e=>e.g==='F').sort((a,b)=>(a.aff>=100)-(b.aff>=100)||b.aff-a.aff).slice(0,80);
+  return`<div class="row sp"><h2 style="margin:0">💘 誰に使う？</h2><button class="btn small" data-a="shopOpen">戻る</button></div>
+  <div class="sm mute" style="margin:6px 0 10px">惚れ薬 ${S.inv.love}本・好感度が高い順に表示</div>
+  <div class="stack" style="gap:6px">${list.map(e=>`<button class="btn" style="text-align:left;display:flex;gap:8px;align-items:center" data-a="potionUse" data-id="${e.id}">${avatar(e,32)}<span class="grow">${esc(e.name)}</span><span class="mute sm">好感度 ${Math.round(e.aff)}</span></button>`).join('')||'<span class="mute sm">女性社員がいません。</span>'}</div>`;
+}
+function nl(t){return String(t).replace(/([。！？…）♡」])(?=「)/g,'$1\n')}
 function scene(o){SQ.push(o);if(!sceneOpen)nextScene()}
 /* ====== harem fx ====== */
 const REDUCED=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1269,7 +1310,7 @@ function nextScene(){
   const btns=o.btns||[{l:'OK',p:1,f:()=>{}}];
   el.innerHTML=`<div class="back scene"><div class="sheet" role="dialog" aria-modal="true">
    ${o.whoList&&o.whoList.length?`<div class="whol">${o.whoList.map(x=>avatar(x,40)).join('')}</div>`:''}<div class="row" style="margin-bottom:6px">${o.who?avatar(o.who,64):''}<h2 style="margin:0" class="grow">${esc(o.title||'')}</h2></div>
-   <div class="say fresh">${o.html||''}</div>
+   <div class="say fresh">${nl(o.html||'')}</div>
    <div class="row" style="justify-content:flex-end;margin-top:10px">${btns.map((b,i)=>`<button class="btn ${b.p?'primary':''}" data-a="sceneBtn" data-i="${i}">${esc(b.l)}</button>`).join('')}</div></div></div>`;
   const f=el.querySelector('.btn.primary')||el.querySelector('.btn');if(f)f.focus();
 }
@@ -1310,7 +1351,7 @@ function empModal(e){
     <div class="card"><div class="sm"><span class="mute">好感度</span> ${e.g==='F'?hearts(e)+' '+STAGE_N[st]:'—'}</div>${e.g==='F'?bar(e.aff,100):''}
       <div class="sm mute" style="margin-top:4px">月給 ${yen(salOf(e))}${e.raise?`（昇給${e.raise}回）`:''}${e.lover?`／絆 Lv ${Math.floor(e.bond/3)}`:''}</div></div></div>
   ${e.tr.length?`<div class="sm" style="margin-bottom:8px">${e.tr.map(t=>`<span class="tag">${TRAITS[t].n}</span> <span class="mute">${TRAITS[t].d}</span>`).join('<br>')}</div>`:''}
-  ${G.react?`<div class="say fresh">${esc(G.react)}</div>`:`<div class="say mute sm">${esc(named?named.intro:'話しかけてみよう。')}</div>`}
+  ${G.react?`<div class="say fresh">${esc(nl(G.react))}</div>`:`<div class="say mute sm">${esc(named?named.intro:'話しかけてみよう。')}</div>`}
   <h3>交流<span class="mute sm">（行動力 ${S.ap}）</span></h3>
   <div class="acts" style="margin-bottom:10px">
    <button class="btn" data-a="act" data-k="talk" data-id="${e.id}">話す<small>行動力1・無料</small></button>
@@ -1355,7 +1396,7 @@ function invCard(){
 }
 function greetCard(){
   const g=(S.greet||[]).filter(x=>empById(x.id));if(!g.length)return'';
-  return`<div class="card"><h3>朝の挨拶${S.greetN>g.length?`<span class="mute sm">（ほか${S.greetN-g.length}人）</span>`:''}</h3><div class="stack" style="gap:8px">${g.map(x=>{const e=empById(x.id);return`<div class="row" style="flex-wrap:nowrap;gap:8px;align-items:flex-start">${avatar(e,44)}<div class="grow sm"><b>${esc(e.name)}</b><div class="mute">${esc(x.text)}</div></div></div>`}).join('')}</div></div>`;
+  return`<div class="card"><h3>朝の挨拶${S.greetN>g.length?`<span class="mute sm">（ほか${S.greetN-g.length}人）</span>`:''}</h3><div class="stack" style="gap:8px">${g.map(x=>{const e=empById(x.id);return`<div class="row" style="flex-wrap:nowrap;gap:8px;align-items:flex-start">${avatar(e,44)}<div class="grow sm"><b>${esc(e.name)}</b><div class="mute" style="white-space:pre-wrap">${esc(nl(x.text))}</div></div></div>`}).join('')}</div></div>`;
 }
 function tabHome(){
   const t=S.tutorial?`<div class="card hl"><h3>遊び方</h3><div class="sm" style="display:grid;gap:4px">
@@ -1367,7 +1408,7 @@ function tabHome(){
   const pj=S.proj.map(projCard).join('')||`<div class="card mute sm">開発中のプロジェクトはありません。<a href="#" data-a="tab" data-t="dev" class="rose">開発タブ</a>から始めよう。</div>`;
   const r=recs();
   const tm=tierOf()>=1&&TIER_MOOD[tierOf()]?`<div class="card hl sm">${esc(TIER_MOOD[tierOf()])}</div>`:'';
-  const top=`<div class="row sp"><button class="btn small" data-a="cheat">＋1000万円</button><button class="btn small" data-a="ambToggle" aria-pressed="${G.amb}">背景演出：${G.amb?'ON':'OFF'}</button></div>`;
+  const top=`<div class="row sp"><span class="row" style="gap:6px"><button class="btn small" data-a="cheat">＋1000万円</button><button class="btn small primary" data-a="shopOpen">🛒 ショップ</button></span><button class="btn small" data-a="ambToggle" aria-pressed="${G.amb}">背景演出：${G.amb?'ON':'OFF'}</button></div>`;
   return`<div class="stack">${top}${t}${tm}${greetCard()}${invCard()}${chatCard()}
   <div class="card"><h3>今週のひとこと</h3><div class="sm" style="display:grid;gap:3px">${r.length?r.map(x=>`<div>・${esc(x)}</div>`).join(''):'<div class="mute">やることは一通り済んでいます。次の週へ進みましょう。</div>'}</div></div>
   <h2>開発中</h2>${pj}
@@ -1608,7 +1649,7 @@ function render(){
   document.getElementById('main').innerHTML=fn();
   if(keepId){const n=document.getElementById(keepId);if(n&&n.focus)n.focus()}
   const apmax=apMax();
-  const dots=Array.from({length:apmax},(_,i)=>`<i class="${i<S.ap?'':'off'}"></i>`).join('');
+  const dots=Array.from({length:Math.max(apmax,S.ap)},(_,i)=>`<i class="${i<S.ap?'':'off'}"></i>`).join('');
   const badge={home:S.staff.some(e=>e.inv),dev:S.proj.length<slotsMax()&&S.staff.length>0};
   document.getElementById('foot').innerHTML=`<div class="adv">
    <button class="btn primary" data-a="next" ${S.over?'disabled':''}>次の週へ ▶</button><button class="btn" data-a="next4">4週</button><button class="btn ${G.auto?'primary':''}" data-a="auto" aria-pressed="${G.auto}">${G.auto?'■ 停止':'自動'}</button></div>
@@ -1647,6 +1688,10 @@ document.addEventListener('click',ev=>{
     case 'trip':doTrip(d.id);break;
     case 'enterRoom':enterRoom();break;
     case 'floorAct':floorAct(d.id);break;
+    case 'shopOpen':showModal(shopHtml);break;
+    case 'shopBuy':shopBuy(d.id);break;
+    case 'potionPick':showModal(potionHtml);break;
+    case 'potionUse':closeModal();usePotion(+d.id);break;
     case 'cheat':S.money+=10000000;save();render();toast('＋1000万円');break;
     case 'ambToggle':G.amb=!G.amb;try{localStorage.setItem('dps-amb',G.amb?'1':'0')}catch(e){}render();break;
     case 'almOpen':showModal(()=>`<div class="row sp"><h2 style="margin:0">📖 ハーレム年鑑</h2><button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div><div class="stack" style="margin-top:10px">${S.almanac.map(r=>`<div class="card"><h3>${r.y}年目</h3><div class="sm" style="white-space:pre-wrap">${esc(almText(r))}</div></div>`).join('')}</div>`);break;
