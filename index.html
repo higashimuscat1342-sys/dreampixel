@@ -1,0 +1,1390 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16131d">
+<meta name="description" content="ゲーム会社の社長になって社員を採用・育成する経営・育成ゲーム">
+<title>ドリームピクセルスタジオ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky status HUD on top, one scrolling stack of cards in the middle, and a thumb-reach footer holding the "next week" button plus five tabs. Single deliberate look: a late-night office in plum and rose. */
+:root{
+  --bg:#16131d; --surf:#201b2b; --surf2:#2a2338; --line:#3a3150;
+  --fg:#f3eefb; --mute:#a99fbd; --rose:#ff6b9a; --rose-d:#c93f70;
+  --amber:#ffc45e; --mint:#6fe3c1; --sky:#7cc4ff; --red:#ff6a6a; --violet:#b79bff;
+  --disp:'Dela Gothic One','Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  --body:'Zen Kaku Gothic New','Hiragino Sans','Noto Sans JP',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.55;padding-inline:0;-webkit-tap-highlight-color:transparent}
+button,select,input,textarea{font:inherit;color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:12px 16px 140px}
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(22,19,29,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.hud-in{max-width:720px;margin:0 auto;padding:8px 16px;display:grid;gap:6px}
+.hud-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.co{font-family:var(--disp);font-size:15px;letter-spacing:.02em}
+.date{color:var(--mute);font-size:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--surf);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip b{font-weight:700}
+.chip.money b{color:var(--amber)} .chip.fame b{color:var(--rose)} .chip.conne b{color:var(--mint)}
+.chip.neg b{color:var(--red)}
+h2{font-family:var(--disp);font-weight:400;font-size:18px;margin:6px 0 10px;letter-spacing:.02em;text-wrap:balance}
+h3{font-size:14px;margin:0 0 6px;font-weight:700}
+.stack{display:grid;gap:12px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r,14px);padding:12px 14px;min-width:0}
+.card.hl{border-color:var(--rose)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
+.row.sp{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.mute{color:var(--mute)} .sm{font-size:12px} .tiny{font-size:11px}
+.rose{color:var(--rose)} .amber{color:var(--amber)} .mint{color:var(--mint)} .red{color:var(--red)} .sky{color:var(--sky)}
+.btn{background:var(--surf2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;min-height:38px;line-height:1.2;text-align:center}
+.btn:hover{border-color:var(--rose)}
+.btn:focus-visible,.tab:focus-visible,.pick:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.btn.primary{background:var(--rose);border-color:var(--rose);color:#2a0d19;font-weight:900}
+.btn.primary:hover{background:#ff86ae}
+.btn.small{padding:5px 9px;min-height:30px;font-size:12px;border-radius:8px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.warn{border-color:var(--amber);color:var(--amber)}
+.bar{height:6px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--rose);border-radius:99px}
+.bar.b{height:9px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.av{border-radius:14px;flex:none;display:block;background:var(--surf2)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:11px;color:var(--mute);line-height:18px}
+.tag.love{border-color:var(--rose);color:var(--rose)}
+.tag.ssr{border-color:var(--amber);color:var(--amber)}
+.tag.sr{border-color:var(--violet);color:var(--violet)}
+.tag.r{border-color:var(--sky);color:var(--sky)}
+.stars{color:var(--amber);letter-spacing:1px}
+.hearts{color:var(--rose);letter-spacing:1px;font-size:12px}
+.hearts .off{color:var(--line)}
+.sbars{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.sbars div{font-size:10px;color:var(--mute);text-align:center}
+.sbars .bar{height:5px;margin-bottom:2px}
+.sbars .bar i{background:var(--c)}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+.tab{background:none;border:0;padding:7px 2px 6px;color:var(--mute);cursor:pointer;font-size:11px;border-radius:8px;min-height:44px}
+.tab b{display:block;font-size:15px;font-weight:400;line-height:1.1}
+.tab.on{color:var(--rose);background:var(--surf)}
+.tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--rose);margin-left:3px;vertical-align:middle}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(22,19,29,.97);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.foot-in{max-width:720px;margin:0 auto;padding:8px 12px 4px;display:grid;gap:6px}
+.adv{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.ap{display:inline-flex;gap:4px;align-items:center}
+.chip.ap{padding-block:5px}
+.ap i{width:12px;height:12px;border-radius:50%;background:var(--rose);display:block}
+.ap i.off{background:var(--surf2);border:1px solid var(--line)}
+.back{position:fixed;inset:0;z-index:50;background:rgba(8,6,12,.72);display:flex;align-items:flex-end;justify-content:center}
+.back.scene{z-index:60;align-items:center;padding:16px}
+.sheet{background:var(--surf);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:640px;max-height:92%;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.back.scene .sheet{border-radius:18px;max-height:88%}
+.sheet h2{margin-top:0}
+.say{background:var(--surf2);border-radius:12px;padding:10px 12px;margin:8px 0;white-space:pre-wrap}
+.say.fresh{border-left:3px solid var(--rose)}
+.acts{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.acts .btn{display:grid;gap:2px}
+.acts .btn small{color:var(--mute);font-size:11px}
+.pick{border:1px solid var(--line);background:var(--surf2);border-radius:10px;padding:6px 10px;cursor:pointer}
+.pick.on{border-color:var(--rose);background:#3a1f30}
+.pick.dim{opacity:.55}
+.picks{display:flex;flex-wrap:wrap;gap:6px}
+label.f{display:grid;gap:3px;font-size:12px;color:var(--mute)}
+select,input[type=text],textarea{background:var(--surf2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+textarea{min-height:90px;font-family:ui-monospace,monospace;font-size:11px}
+.log{display:grid;gap:4px;font-size:12px;color:var(--mute)}
+.log div{padding-left:8px;border-left:2px solid var(--line)}
+.log div.hi{border-color:var(--rose);color:var(--fg)}
+.log div.gd{border-color:var(--mint);color:var(--fg)}
+.log div.bd{border-color:var(--red);color:var(--fg)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:13px}
+.kv span:nth-child(odd){color:var(--mute)}
+.ach{display:flex;gap:10px;align-items:center}
+.ach .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surf2);border:1px solid var(--line);flex:none;font-size:15px}
+.ach.done .ic{background:var(--rose);border-color:var(--rose);color:#2a0d19}
+.ach.done{opacity:1}.ach:not(.done){opacity:.6}
+.dex{display:flex;gap:10px;align-items:center}
+.dex.no .av{filter:brightness(0) opacity(.5)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:70;background:var(--fg);color:#16131d;border-radius:999px;padding:8px 16px;font-weight:700;max-width:90%;text-align:center;pointer-events:none}
+.title-big{font-family:var(--disp);font-size:26px;line-height:1.2;margin:0 0 6px;text-wrap:balance}
+.sep{height:1px;background:var(--line);margin:8px 0}
+.num{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}}
+
+
+html{background:var(--bg)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+</style>
+</head>
+<body>
+<div id="hud" class="hud"></div>
+<div class="wrap" id="main"></div>
+<div class="foot"><div class="foot-in" id="foot"></div></div>
+<div id="modal"></div>
+<div id="scene"></div>
+<div id="toast"></div>
+
+<script src="message.html"></script>
+<script>
+if(!window.MSG){try{var __x=new XMLHttpRequest();__x.open('GET','message.html',false);__x.send();if(__x.responseText)(0,eval)(__x.responseText)}catch(e){}}
+if(!window.MSG){document.body.innerHTML='<div style="padding:24px;color:#f3eefb;font-family:sans-serif">message.html を読み込めませんでした。index.html と同じフォルダに置いてください。</div>';throw new Error('message.html not found')}
+const {SUR,FN,MN,NAMED,TALK,LOVE_TALK,SCENES,DATE_PLACES,DATE_Q,GIFT_R,LUNCH_R,TITLE_A,TITLE_B,KISS_LINE,KISS_ACT,INV_LINE,INV_N,NIGHT,OUTSIDERS,HEART_SC,TRIP_PAIR}=window.MSG;
+'use strict';
+/* ====== utils ====== */
+const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const wpick=w=>{let t=w.reduce((a,b)=>a+b,0),r=Math.random()*t;for(let i=0;i<w.length;i++){if((r-=w[i])<0)return i}return w.length-1};
+const seeded=seed=>{let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const yen=n=>{n=Math.round(n);const s=n<0?'-':'';n=Math.abs(n);
+  if(n>=1e12)return s+(n/1e12).toFixed(2)+'兆円';
+  if(n>=1e8)return s+(n/1e8).toFixed(n>=1e9?1:2)+'億円';
+  if(n>=1e4)return s+Math.floor(n/1e4).toLocaleString()+'万円';
+  return s+n.toLocaleString()+'円'};
+const num=n=>Math.round(n).toLocaleString();
+
+/* ====== master data ====== */
+const ST=['企画','プログラム','グラフィック','シナリオ','サウンド'];
+const STS=['企','プ','グ','シ','サ'];
+const STC=['#ffc45e','#7cc4ff','#ff6b9a','#b79bff','#6fe3c1'];
+const JOBS=['プランナー','プログラマー','デザイナー','ライター','コンポーザー'];
+const GENRES=[
+ {n:'RPG',w:[1,1.2,1.2,1.6,1]},{n:'アクション',w:[.8,1.8,1.2,.6,1]},{n:'シミュレーション',w:[1.6,1.5,.8,.8,.6]},
+ {n:'ノベル',w:[.8,.4,1.4,2,1.2]},{n:'パズル',w:[1.2,1.4,1,.4,.8]},{n:'リズム',w:[.8,1.2,1,.4,2]},
+ {n:'育成',w:[1.4,1,1.4,1.4,.8]},{n:'シューティング',w:[.7,1.7,1.4,.4,1.2]}];
+const THEMES=['ファンタジー','SF','学園','ホラー','戦国','日常','ロボット','アイドル'];
+const PLATS=[{n:'スマホ',price:700,u:1.5,t:1,unlock:0},{n:'PC',price:1900,u:1,t:1.4,unlock:0},{n:'家庭用機',price:6200,u:1.25,t:2.4,unlock:2},{n:'次世代VR機',price:8800,u:.9,t:3.4,unlock:3}];
+const SCALES=[{n:'小規模',T:700,u:1,unlock:0,fame:1},{n:'中規模',T:3200,u:3.6,unlock:0,fame:3},{n:'大規模',T:13000,u:13,unlock:2,fame:9},{n:'超大作',T:48000,u:42,unlock:3,fame:26}];
+const compat=(g,t)=>0.78+(((g*7+t*13+g*t*3+g*g)%10)/10)*0.58;
+const compatMark=c=>c>=1.2?'◎':c>=1.02?'○':c>=0.9?'△':'×';
+const OFFICES=[
+ {n:'小さな貸しオフィス',cap:10,cost:0,rent:90000},{n:'雑居ビルのワンフロア',cap:20,cost:6000000,rent:260000},
+ {n:'一棟貸しのビル',cap:40,cost:40000000,rent:800000},{n:'駅前の自社ビル',cap:70,cost:260000000,rent:2800000},
+ {n:'超高層タワー',cap:120,cost:1600000000,rent:10000000}];
+const SLOTS=[1,2,2,3,4];
+const FACS=[
+ {id:'plant',n:'観葉植物',d:'やる気の基準値 +2/Lv',base:80000,min:0},
+ {id:'coffee',n:'コーヒーマシン',d:'疲労の蓄積 -6%/Lv',base:150000,min:0},
+ {id:'pc',n:'ハイスペックPC',d:'開発の成果 +4%/Lv',base:400000,min:0},
+ {id:'nap',n:'仮眠室',d:'休む日の回復 +4/Lv',base:600000,min:1},
+ {id:'lib',n:'資料室',d:'社員の経験値 +8%/Lv',base:700000,min:1},
+ {id:'cafe',n:'社員食堂',d:'ランチの好感度 +15%/Lv',base:1200000,min:1},
+ {id:'lounge',n:'休憩ラウンジ',d:'ハーモニー +4/Lv・好感度が自然に上がる',base:2000000,min:2},
+ {id:'studio',n:'モーションキャプチャ室',d:'グラフィック・サウンド成果 +5%/Lv',base:6000000,min:2},
+ {id:'pr',n:'広報部',d:'知名度の獲得 +8%/Lv',base:9000000,min:2},
+ {id:'gift',n:'ギフトショップ',d:'プレゼント代 -8%/Lv',base:3000000,min:2},
+ {id:'nursery',n:'社内保育園',d:'産休が短くなる（-1週/Lv）',base:2500000,min:1},
+ {id:'vip',n:'社長専用ラウンジ',d:'ハーモニー +8/Lv（ハーレム運営の味方）',base:1500000,min:1},
+ {id:'spa',n:'社内スパ',d:'休暇の効果が増え、やる気 +3/Lv',base:40000000,min:3}];
+const facCost=(f,lv)=>Math.round(f.base*Math.pow(2.3,lv));
+const FAC_MAX=5;
+
+const TYPES=[
+ {n:'真面目',likes:[2,5],dis:[4]},{n:'元気',likes:[0,3],dis:[5]},{n:'クール',likes:[3,5],dis:[0]},{n:'天然',likes:[0,1],dis:[3]},
+ {n:'ツンデレ',likes:[2,4],dis:[1]},{n:'お姉さん',likes:[5,1],dis:[0]},{n:'内気',likes:[2,0],dis:[4]},{n:'小悪魔',likes:[4,1],dis:[2]}];
+const GIFTS=[{n:'コンビニスイーツ',p:800,a:2},{n:'コスメセット',p:6000,a:4},{n:'文庫本・画集',p:3000,a:4},{n:'最新ガジェット',p:20000,a:6},{n:'ブランドバッグ',p:150000,a:12},{n:'ワイン',p:12000,a:5}];
+const STAGES=[0,12,28,45,62,78];
+const STAGE_N=['他人','顔見知り','仲間','信頼','親愛','特別'];
+const RAR=['N','R','SR','SSR'];
+const RAR_BASE=[[8,24],[16,36],[26,50],[38,64]];
+const RAR_POT=[[.8,1.1],[1,1.3],[1.2,1.6],[1.5,2]];
+const RAR_SAL=[1,1.3,1.8,2.6];
+
+const TRAITS={
+ tetsu:{n:'徹夜型',d:'疲労が溜まりにくい',fat:.7},seed:{n:'天才肌',d:'全成果 +10%',out:1.1},kosei:{n:'努力家',d:'経験値 +25%',exp:1.25},
+ aibo:{n:'社長ラブ',d:'好感度の上昇 +30%',aff:1.3},shino:{n:'堅実',d:'給料 -10%',sal:.9},idol:{n:'看板',d:'知名度の獲得 +5%',fame:1.05},
+ mood:{n:'ムードメーカー',d:'ハーモニー +2',harm:2},perf:{n:'完璧主義',d:'品質 +5%・開発が少し遅い',q:1.05,out:.92},
+ hon:{n:'ゲーマー',d:'企画・プログラム +8',b:[8,8,0,0,0]},art:{n:'絵描き',d:'グラフィック +12',b:[0,0,12,0,0]},
+ wri:{n:'文学少女',d:'シナリオ +12',b:[0,0,0,12,0]},sou:{n:'絶対音感',d:'サウンド +12',b:[0,0,0,0,12]},
+ lazy:{n:'マイペース',d:'成果 -8%・疲労が溜まりにくい',out:.92,fat:.8}};
+const TRAIT_KEYS=Object.keys(TRAITS);
+
+const TRIPS=[
+ {id:'onsen',n:'温泉旅行',per:20000,aff:6,mot:15,txt:'貸切の旅館でのんびり。夜は部屋ごとに、ささやかな宴会になった。'},
+ {id:'beach',n:'南の島のビーチ',per:45000,aff:9,mot:20,txt:'青い海と白い砂浜。日が暮れるまで、みんなではしゃいだ。'},
+ {id:'abroad',n:'海外クルーズ',per:90000,aff:12,mot:25,txt:'豪華客船の甲板で、満天の星空を眺めた。夜風が心地よい。'}];
+const ROOM_ITEMS=[
+ {id:'desk',n:'重厚なデスク',d:'企画の成果 +2pt/週',cost:1000000,min:0},
+ {id:'photo',n:'写真の壁',d:'社員との思い出を飾る。恋人の成果 +3%',cost:1200000,min:0},
+ {id:'cab',n:'飾り棚',d:'もらったプレゼントが並ぶ。プレゼントの好感度 +10%',cost:1500000,min:0},
+ {id:'sofa',n:'来客用ソファ',d:'交流で得られる好感度 +10%',cost:2000000,min:1},
+ {id:'sec',n:'専用の秘書席',d:'秘書を1人指名。行動力 +1・秘書の好感度が毎週上がる',cost:3000000,min:1},
+ {id:'chand',n:'シャンデリア',d:'全員のやる気の基準値 +2',cost:8000000,min:2}];
+const TITLES=[
+ {id:'t0',n:'見習い社長',c:()=>true},{id:'t1',n:'駆け出し社長',c:()=>S.stat.games>=1},{id:'t2',n:'ヒットメーカー',c:()=>S.stat.hits>=1},
+ {id:'t3',n:'業界の風雲児',c:()=>S.fame>=300},{id:'t4',n:'業界の顔',c:()=>S.fame>=2000},{id:'t5',n:'ゲーム王',c:()=>S.stat.rev>=1e10},
+ {id:'t12',n:'お祝い上手',c:()=>S.stat.bday>=20},{id:'t13',n:'ファンクラブ会長',c:()=>S.club.n>=50},
+ {id:'t6',r:1,n:'愛される社長',c:()=>lovers().length>=3},{id:'t7',r:1,n:'モテ社長',c:()=>lovers().length>=10},
+ {id:'t8',r:1,n:'社内一の人気者',c:()=>lovers().length>=30},{id:'t9',r:1,n:'ハーレム王',c:()=>lovers().length>=60},
+ {id:'t10',r:1,n:'子宝社長',c:()=>S.stat.kids>=10},{id:'t11',r:1,n:'大家族の長',c:()=>S.stat.kids>=50},{id:'t14',r:1,n:'チョコの山の主',c:()=>S.stat.choco>=100}];
+
+/* ====== state ====== */
+const SAVE_KEY='studio-risshiden-v1';
+const PERKS=[
+ {id:'cash',n:'創業資金',d:'開始資金 +500万円/Lv',max:20,c:l=>l+1},
+ {id:'conne',n:'広い人脈',d:'開始コネ +2/Lv',max:10,c:l=>l+1},
+ {id:'ap',n:'タフな社長',d:'1週の行動力 +1',max:2,c:l=>10*(l+1)},
+ {id:'edu',n:'教育方針',d:'社員の経験値 +10%/Lv',max:20,c:l=>l+1},
+ {id:'charm',n:'カリスマ',d:'好感度の上昇 +8%/Lv',max:20,c:l=>l+1},
+ {id:'eye',n:'目利き',d:'高レア候補の出現率アップ',max:10,c:l=>l+2},
+ {id:'carry',n:'殿堂入り枠',d:'再起業で引き継げる社員 +1',max:5,c:l=>5*(l+1)},
+ {id:'sales',n:'ヒットの法則',d:'売上 +6%/Lv',max:30,c:l=>l+1},
+ {id:'speed',n:'開発加速',d:'開発の成果 +4%/Lv',max:30,c:l=>l+1}];
+let S=null, G={tab:'home',auto:false,sort:'aff',filter:'all',empId:null,form:{g:0,t:0,pf:0,sc:0,title:''},react:'',hireF:false,sel:null};
+
+function freshLegacy(){return{pts:0,perks:{},runs:0,carry:[]}}
+function newState(prev){
+  const L=prev?prev.legacy:freshLegacy();
+  const pk=id=>L.perks[id]||0;
+  const s={v:1,week:0,name:prev?prev.name:'ドリームピクセルスタジオ',money:3000000+pk('cash')*5000000,fame:0,fans:0,conne:3+pk('conne')*2,ap:3+Math.min(2,pk('ap')),
+    pres:{plan:1,biz:1,cha:1,net:1,exp:{plan:0,biz:0,cha:0,net:0}},office:0,fac:{},staff:[],cand:[],proj:[],contracts:[],released:[],
+    gexp:prev?prev.gexp:Array(8).fill(0),texp:prev?prev.texp:Array(8).fill(0),known:prev?prev.known:{},trend:{g:0,t:0,until:10},
+    ach:prev?prev.ach:{},dex:prev?prev.dex:{},typeDex:prev?prev.typeDex:{},
+    rd:{eng:0,mkt:0,edu:0},room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
+    log:[],pity:0,schoolAt:-99,nextId:1,over:false,legacy:L,tutorial:true,revAll:prev?prev.revAll:0};
+  return s;
+}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
+function migrate(s){for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
+function load(){try{const t=localStorage.getItem(SAVE_KEY);if(!t)return null;const s=JSON.parse(t);return s&&s.v===1?migrate(s):null}catch(e){return null}}
+const perk=id=>S.legacy.perks[id]||0;
+const fac=id=>S.fac[id]||0;
+const logm=(t,c)=>{S.log.unshift({t,c:c||'',w:S.week});if(S.log.length>60)S.log.length=60};
+const cal=(w=S.week)=>{const y=Math.floor(w/48),m=Math.floor((w%48)/4),wk=w%4+1;return{y:y+1,mo:(m+3)%12+1,m,wk}};
+const calStr=w=>{const c=cal(w);return`${c.y}年目 ${c.mo}月 第${c.wk}週`};
+
+/* ====== employees ====== */
+const lovers=()=>S.staff.filter(e=>e.lover);
+const apMax=()=>3+Math.min(2,perk('ap'))+(S.room&&S.room.items.sec&&S.sec&&empById(S.sec)?1:0);
+function harmony(){const L=lovers().length;let h=100-Math.max(0,L-8)*2+fac('lounge')*4+fac('vip')*8;for(const e of S.staff)for(const t of e.tr)h+=TRAITS[t].harm||0;return clamp(h,40,100)}
+const effStat=(e,k)=>{let v=e.s[k];for(const t of e.tr){const b=TRAITS[t].b;if(b)v+=b[k]}return v};
+const statTotal=e=>[0,1,2,3,4].reduce((a,k)=>a+effStat(e,k),0);
+const jobOf=e=>{let b=0;for(let k=1;k<5;k++)if(effStat(e,k)>effStat(e,b))b=k;return b};
+const tMul=(e,key)=>e.tr.reduce((a,t)=>a*(TRAITS[t][key]||1),1);
+const lvCap=e=>20+10*e.star;
+function outMul(e){
+  const h=harmony();
+  return tMul(e,'out')*(1+.1*e.star)*(.7+.3*e.mot/100)*(1-Math.max(0,e.fat-60)/100*.8)*(e.lover?1.1+.02*Math.min(10,Math.floor(e.bond/3)):1)*(h>=60?1:.85+.15*h/60)*(1+.04*fac('pc'))*(1+.04*perk('speed'))*(1+.02*S.rd.eng)*(e.preg>0?.85:1)*(e.lover&&S.room.items.photo?1.03:1);
+}
+function salOf(e){const raw=(150000+e.lv*6000)*RAR_SAL[e.rar]*tMul(e,'sal')*(1+.08*e.star)*Math.pow(1.1,e.raise)*(1-Math.min(.3,S.pres.biz*.003));return Math.round(raw/1000)*1000}
+const stageOf=e=>{let s=0;for(let i=0;i<STAGES.length;i++)if(e.aff>=STAGES[i])s=i;return s};
+const capacity=()=>OFFICES[S.office].cap;
+const empById=id=>S.staff.find(e=>e.id===id);
+const needExp=e=>30+e.lv*18;
+
+function genEmp(o={}){
+  const rar=o.rar!=null?o.rar:wpick([70,25,5,0]);
+  const g=o.g||(Math.random()<.65?'F':'M');
+  const e={id:S.nextId++,g,rar,type:RI(0,7),seed:RI(1,1e9),age:o.young?RI(20,23):RI(21,36),lv:1,exp:0,star:0,mot:60,fat:0,aff:0,lover:false,bond:0,dateW:-99,seen:0,pj:null,leave:false,act:{n:0},last:0,raise:0,likes:{},tr:[],named:null,kids:0,preg:0,mat:0,inv:null,invW:0,bd:RI(0,47),heartW:-99};
+  const [lo,hi]=RAR_BASE[rar];
+  e.s=[0,0,0,0,0].map(()=>R(lo,hi));
+  e.s[RI(0,4)]*=1.5; if(Math.random()<.4)e.s[RI(0,4)]*=1.25;
+  e.s=e.s.map(v=>Math.round(v));
+  e.pot=+R(...RAR_POT[rar]).toFixed(2); if(o.young)e.pot=+(e.pot*1.15).toFixed(2);
+  const nt=rar>=2?2:(Math.random()<.6?1:0); const pool=TRAIT_KEYS.slice();
+  for(let i=0;i<nt;i++){e.tr.push(pool.splice(RI(0,pool.length-1),1)[0])}
+  e.name=pick(SUR)+' '+(g==='F'?pick(FN):pick(MN));
+  e.apt=e.s.map(v=>v/e.s.reduce((a,b)=>a+b,0));
+  return e;
+}
+function fromNamed(n){
+  const e=genEmp({rar:n.rar,g:n.g||'F'});
+  e.named=n.id;e.name=n.name;e.type=n.type;e.s=n.s.slice();e.tr=n.tr.slice();e.seed=n.seed;e.pot=n.pot;e.age=n.age;
+  e.apt=e.s.map(v=>v/e.s.reduce((a,b)=>a+b,0));
+  return e;
+}
+function levelUp(e){e.lv++;for(let k=0;k<5;k++)e.s[k]+=e.pot*(.5+e.apt[k]*5)*R(.55,1.1)}
+
+/* ====== recruiting ====== */
+const ADS=[
+ {id:'web',n:'求人サイトに掲載',d:'幅広く募集。N〜Rが中心',cost:200000,cnt:3,w:[70,25,5,0]},
+ {id:'agent',n:'人材エージェント',d:'即戦力が集まりやすい',cost:1000000,cnt:4,w:[40,45,14,1]},
+ {id:'head',n:'ヘッドハンティング',d:'コネ3を使用。SR以上が中心',conne:3,cnt:3,w:[0,35,50,15],named:true},
+ {id:'fair',n:'合同企業説明会',d:'大量募集。N〜Rが中心',cost:2000000,cnt:8,w:[55,38,7,0]},
+ {id:'school',n:'専門学校の推薦',d:'4週に1回無料。若く伸びしろ大',free:true,cnt:2,w:[60,35,5,0],young:true}];
+function adCost(a){if(a.free||a.conne)return 0;return Math.round(a.cost*(1+(G.hireF?.5:0))*(1-Math.min(.3,S.pres.net*.003)))}
+function recruit(id){
+  const a=ADS.find(x=>x.id===id);
+  if(a.free&&S.week-S.schoolAt<4)return toast('推薦枠はあと'+(4-(S.week-S.schoolAt))+'週で使えます');
+  if(a.conne&&S.conne<a.conne)return toast('コネが足りません');
+  const c=adCost(a); if(S.money<c)return toast('資金が足りません');
+  S.money-=c; if(a.conne)S.conne-=a.conne; if(a.free)S.schoolAt=S.week;
+  S.cand=S.cand.filter(x=>x.exp>S.week);
+  const eye=perk('eye'); const w=a.w.slice(); w[2]+=eye*3;w[3]+=eye*1.2;w[0]=Math.max(0,w[0]-eye*3);
+  const owned=new Set(S.staff.map(e=>e.named).concat(S.cand.map(e=>e.named)).filter(Boolean));
+  const made=[];
+  for(let i=0;i<a.cnt;i++){
+    let rar=wpick(w);
+    if(a.id==='head'){S.pity++; if(S.pity>=10&&i===0){rar=3;S.pity=0}else if(rar===3)S.pity=0}
+    let c1=null;
+    if(rar>=2&&(a.named||Math.random()<.15)){
+      const pool=NAMED.filter(n=>n.rar===rar&&!owned.has(n.id)&&(!G.hireF||(n.g||'F')==='F'));
+      if(pool.length&&Math.random()<(a.named?.55:.3)){const n=pick(pool);owned.add(n.id);c1=fromNamed(n)}
+    }
+    if(!c1){
+      let g=G.hireF?'F':(Math.random()<.5?'F':'M'); c1=genEmp({rar,g,young:a.young});
+    }
+    c1.rev=false;c1.exp=S.week+4;c1.cid=c1.id;made.push(c1);S.cand.push(c1);
+  }
+  logm(`${a.n}：${made.length}名の応募があった`,'hi');
+  if(made.some(x=>x.rar===3))toast('✨ SSRの応募者がいます！');
+  checkAch();save();render();
+}
+function hire(id){
+  const i=S.cand.findIndex(c=>c.id===id); if(i<0)return;
+  const c=S.cand[i];
+  if(S.staff.length>=capacity())return toast('オフィスがいっぱいです。拡張しましょう');
+  const fee=Math.round(salOf(c)*1.5); if(S.money<fee)return toast('契約金が足りません');
+  S.money-=fee;S.cand.splice(i,1);delete c.rev;delete c.cid;c.exp=0;c.mot=75;c.last=S.week;
+  if(S.proj[0])c.pj=S.proj[0].id;
+  S.staff.push(c);S.stat.hired++;S.stat.maxStaff=Math.max(S.stat.maxStaff,S.staff.length);
+  if(c.named)S.dex[c.named]=true; if(c.g==='F')S.typeDex[c.type]=true;
+  logm(`${c.name} が入社した（${RAR[c.rar]}・${JOBS[jobOf(c)]}）`,'gd');
+  if(c.named){const n=NAMED.find(x=>x.id===c.named);scene({who:c,title:'新入社員',html:`<b>${esc(c.name)}</b>\n${esc(n.bio)}\n\n${esc(n.intro)}`})}
+  else toast(c.name+' が入社しました');
+  checkAch();save();render();
+}
+function fire(id){
+  const i=S.staff.findIndex(e=>e.id===id);if(i<0)return;const e=S.staff[i];
+  S.staff.splice(i,1);S.stat.fired++;logm(`${e.name} は退社した`,'bd');closeModal();save();render();
+}
+
+/* ====== affection ====== */
+function stageScene(e,st){
+  if(e.g!=='F')return;
+  const txt=SCENES[e.type][st-1].replace(/\{n\}/g,e.name.split(' ')[1]||e.name);
+  if(st<5){scene({who:e,title:`${STAGE_N[st]}になった`,html:esc(txt)});return}
+  scene({who:e,title:'想いの告白',html:esc(txt),btns:[{l:'想いに応える ♥',p:1,f:()=>acceptLove(e.id)}]});
+}
+function acceptLove(id){
+  const e=empById(id);if(!e||e.lover)return;
+  e.lover=true;e.mot=Math.min(100,e.mot+20);S.stat.lovers=Math.max(S.stat.lovers,lovers().length);
+  const n=NAMED.find(x=>x.id===e.named);
+  logm(`${e.name} と特別な関係になった ♥`,'hi');
+  scene({who:e,title:'♥ 特別な関係',html:esc(n?n.sp:`二人は、仕事仲間以上の特別な関係になった。\n${e.name.split(' ')[1]}は嬉しそうに微笑んでいる。`)});
+  checkAch();save();render();
+}
+function addAff(e,v,silent){
+  const b=stageOf(e);e.aff=clamp(e.aff+v,0,100);e.last=S.week;const a=stageOf(e);
+  if(!silent&&e.g==='F')for(let s=b+1;s<=a;s++){if(s>e.seen){e.seen=s;stageScene(e,s)}}
+  else if(e.g!=='F')e.seen=a;
+}
+function affGain(e,base){
+  const rep=e.act.n||0;e.act.n=rep+1;
+  let g=base*Math.pow(.75,rep)*(S.room.items.sofa?1.1:1)*(1+S.pres.cha*.01+perk('charm')*.08)*tMul(e,'aff')*(e.lover?1.2:1)*R(.85,1.15);
+  g=Math.max(.5,g);addAff(e,g);gainPres('cha',1);return g;
+}
+function gainPres(k,v){
+  const p=S.pres;p.exp[k]+=v;
+  while(p.exp[k]>=p[k]*10+10){p.exp[k]-=p[k]*10+10;p[k]++;toast(({plan:'企画力',biz:'経営力',cha:'魅力',net:'人脈'})[k]+'が Lv'+p[k]+' に上がった！')}
+}
+function useAP(n=1){if(S.ap<n){toast('行動力が足りません（次の週で回復）');return false}S.ap-=n;return true}
+function spend(c){if(S.money<c){toast('資金が足りません');return false}S.money-=c;return true}
+function say(e,t){G.react=t}
+
+function bulkAff(e,v){
+  e.aff=clamp(e.aff+v*(1+S.pres.cha*.01+perk('charm')*.08),0,100);e.last=S.week;
+  const a=stageOf(e);if(a>e.seen)e.seen=a;
+  if(a>=5&&!e.lover){e.lover=true;S.stat.lovers=Math.max(S.stat.lovers,lovers().length);logm(`${e.name} と特別な関係になった ♥`,'hi')}
+}
+function tryChild(e){
+  bulkAff(e,5);e.mot=Math.min(100,e.mot+12);e.fat=Math.max(0,e.fat-8);
+  const got=Math.random()<.5+Math.min(.2,e.bond*.01)+(e.lover?.1:0);
+  if(got)e.preg=8;return got;
+}
+const kidsTotal=()=>S.stat.kids||0;
+const canChild=e=>e.g==='F'&&e.aff>=STAGES[4]&&!e.preg&&!e.mat;
+function acceptInvite(id,bulk){
+  const e=empById(id);if(!e||!e.inv)return null;
+  const k=e.inv;e.inv=null;const nm=e.name.split(' ')[1]||e.name;let kid=false;
+  if(k==='night'&&!canChild(e))return{k:'lunch',kid:false,skip:true};
+  if(k==='lunch'){bulkAff(e,4);e.mot=Math.min(100,e.mot+6);if(!bulk)toast(nm+'とランチを楽しんだ')}
+  else if(k==='date'){bulkAff(e,6);e.mot=Math.min(100,e.mot+10);if(e.lover)e.bond++;S.stat.dates++;
+    if(!bulk)scene({who:e,title:'休日のおでかけ',html:esc(`${pick(DATE_PLACES)}へ出かけた。\n${nm}${DATE_Q[e.type]}`)})}
+  else{kid=tryChild(e);S.stat.dates++;
+    if(!bulk)scene({who:e,title:'ふたりの夜',html:esc(pick(NIGHT).replace(/\{n\}/g,nm)+'\n\n'+(kid?`${nm}は幸せそうに、お腹へそっと手を当てた。（新しい命を授かった）`:'ふたりは穏やかな朝を迎えた。'))})}
+  return{k,kid};
+}
+function acceptAllInvites(){
+  let n=0,kids=0;for(const e of S.staff.filter(x=>x.inv)){const r=acceptInvite(e.id,true);if(r&&!r.skip){n++;if(r.kid)kids++}}
+  if(!n)return toast('受けられるお誘いがありません');
+  logm(`お誘いを${n}件受けた（新しい命 ${kids}）`,'hi');checkAch();save();render();
+  scene({title:'お誘いをすべて受けた',html:`${n}件のお誘いに応えた。\n好感度とやる気がアップ。${kids?`\n<b class="rose">${kids}人</b>が新しい命を授かった。`:''}`});
+}
+function declineInvite(id){const e=empById(id);if(e)e.inv=null;save();render()}
+function empAct(id,kind,arg){
+  const e=empById(id);if(!e)return;
+  const nm=e.name.split(' ')[1]||e.name; let r='';
+  if(kind==='talk'){
+    if(!useAP())return;
+    const g=affGain(e,3.5);e.mot=Math.min(100,e.mot+4);e.fat=Math.max(0,e.fat-2);
+    r=e.g==='M'?pick(['「社長、今日もよろしくお願いします！」','「最近の開発、いい感じですよ」']):(e.lover&&Math.random()<.65?pick([LOVE_TALK[e.type]]):pick(TALK[e.type]));
+    r+=`\n（好感度 +${g.toFixed(1)}）`;
+  }else if(kind==='lunch'){
+    const c=5000;if(S.ap<1)return useAP();if(!spend(c))return;useAP();
+    const g=affGain(e,6*(1+.15*fac('cafe')));e.mot=Math.min(100,e.mot+6);e.fat=Math.max(0,e.fat-5);
+    r=`${nm}と${pick(LUNCH_R).replace(/^二人で/,'')}\n（好感度 +${g.toFixed(1)}）`;
+  }else if(kind==='gift'){
+    const gf=GIFTS[arg];const c=Math.round(gf.p*(1-.08*fac('gift')));if(S.ap<1)return useAP();if(!spend(c))return;useAP();
+    const T=TYPES[e.type];let m=1,k='ok';if(T.likes.includes(arg)){m=2;k='love'}else if(T.dis.includes(arg)){m=.35;k='bad'}
+    e.likes[arg]=k;S.stat.gifts++;
+    const g=affGain(e,gf.a*m*(S.room.items.cab?1.1:1));e.mot=Math.min(100,e.mot+(k==='love'?10:k==='ok'?4:0));
+    r=pick(GIFT_R[k])+`\n（好感度 +${g.toFixed(1)}）`;
+  }else if(kind==='train'){
+    const c=30000+e.lv*2500;if(S.ap<1)return useAP();if(!spend(c))return;useAP();
+    const d=R(1.5,3.5)*e.pot;e.s[arg]+=d;e.fat=Math.min(100,e.fat+8);gainExp(e,40);addAff(e,1);
+    r=`${ST[arg]}を特訓した。（${ST[arg]} +${d.toFixed(1)}）`;
+  }else if(kind==='counsel'){
+    if(!useAP())return;e.fat=Math.max(0,e.fat-25);e.mot=Math.min(100,e.mot+12);const g=affGain(e,3);
+    r=`じっくり相談に乗った。疲れが取れたようだ。\n（好感度 +${g.toFixed(1)}）`;
+  }else if(kind==='raise'){
+    if(e.raise>=5)return toast('これ以上は昇給できません');
+    e.raise++;e.mot=Math.min(100,e.mot+12);addAff(e,3);r=`昇給した。月給は ${yen(salOf(e))} になった。`;
+  }else if(kind==='rest'){
+    e.leave=!e.leave;r=e.leave?'今週は休暇にした。（開発を休み、疲労が大きく回復）':'休暇を取り消した。';
+  }else if(kind==='date'){
+    if(e.g!=='F'||stageOf(e)<3)return toast('もっと仲良くなってから誘いましょう');
+    if(S.week-e.dateW<4)return toast('前回のお出かけから4週あけましょう');
+    const c=40000;if(S.ap<1)return useAP();if(!spend(c))return;useAP();
+    e.dateW=S.week;e.date=(e.date||0)+1;if(e.lover)e.bond++;S.stat.dates++;
+    const g=affGain(e,e.lover?5:10);e.mot=Math.min(100,e.mot+15);e.fat=0;
+    const place=pick(DATE_PLACES);
+    scene({who:e,title:'休日のおでかけ',html:esc(`${place}へ出かけた。\n${nm}${DATE_Q[e.type]}\n\n（好感度 +${g.toFixed(1)}${e.lover?`／絆Lv ${Math.floor(e.bond/3)}`:''}）`)});
+    r='楽しい休日だった。';
+  }else if(kind==='child'){
+    if(e.g!=='F'||e.aff<STAGES[4])return toast('もっと親密になってから');
+    if(e.preg>0||e.mat>0)return toast('今は大切な時期です');
+    if(!useAP())return;
+    const got=tryChild(e);
+    scene({who:e,title:'ふたりの夜',html:esc(pick(NIGHT).replace(/\{n\}/g,nm)+'\n\n'+(got?`${nm}は幸せそうに、お腹へそっと手を当てた。（新しい命を授かった）`:'ふたりは穏やかな朝を迎えた。'))});
+    r=got?'新しい命を授かった。':'穏やかな夜だった。';
+  }else if(kind==='love'){acceptLove(e.id);r='';}
+  else if(kind==='star'){
+    const c=2000000*Math.pow(3,e.star);if(e.lv<lvCap(e)||e.star>=5)return toast('Lvが上限に達していません');if(!spend(c))return;
+    e.star++;r=`限界突破！ ★${e.star} になった。（Lv上限 ${lvCap(e)}・成果 +10%）`;
+  }else if(kind==='assign'){
+    e.pj=arg||null;r=arg?'開発チームに配属した。':'配属を解除した。';
+  }
+  if(r){G.react=r;if(G.empId)toast(r.split('\n')[0].slice(0,32))}
+  checkAch();save();render();
+}
+function gainExp(e,v){
+  v*=tMul(e,'exp')*(1+.08*fac('lib'))*(1+.1*perk('edu'))*(1+.03*S.rd.edu);e.exp+=v;
+  while(e.exp>=needExp(e)&&e.lv<lvCap(e)){e.exp-=needExp(e);levelUp(e);if(e.lv%5===0)logm(`${e.name} が Lv${e.lv} になった`)}
+  if(e.lv>=lvCap(e))e.exp=Math.min(e.exp,needExp(e));
+}
+
+/* ====== projects ====== */
+const projProg=p=>{let a=0,b=0;for(let k=0;k<5;k++){a+=Math.min(p.pts[k],p.tgt[k]);b+=p.tgt[k]}return a/b};
+const genreLv=g=>Math.min(10,Math.floor(Math.sqrt(S.gexp[g]*2)));
+const themeLv=t=>Math.min(10,Math.floor(Math.sqrt(S.texp[t]*2)));
+const slotsMax=()=>SLOTS[S.office];
+function startProject(){
+  const f=G.form;const sc=SCALES[f.sc],pf=PLATS[f.pf];
+  if(S.proj.length>=slotsMax())return toast('開発スロットが埋まっています');
+  if(sc.unlock>S.office||pf.unlock>S.office)return toast('オフィスを拡張すると解放されます');
+  const gw=GENRES[f.g].w;const T=sc.T*pf.t;
+  const p={id:S.nextId++,kind:'game',title:(f.title||'').trim()||(pick(TITLE_A)+pick(TITLE_B)),g:f.g,t:f.t,pf:f.pf,sc:f.sc,
+    tgt:gw.map(w=>Math.round(T*w/5)),pts:[0,0,0,0,0],hype:0,start:S.week};
+  S.proj.push(p);G.form.title='';
+  for(const e of S.staff)if(!e.pj)e.pj=p.id;
+  logm(`開発開始：『${p.title}』（${GENRES[p.g].n}×${THEMES[p.t]}）`,'hi');
+  save();render();
+}
+function projOut(p){
+  const out=[0,0,0,0,0];
+  for(const e of S.staff){if(e.pj!==p.id||e.leave)continue;const m=outMul(e);for(let k=0;k<5;k++)out[k]+=effStat(e,k)*m*.9*((k===2||k===4)?1+.05*fac('studio'):1)}
+  const pr=(3+S.pres.plan*1.1+(S.room.items.desk?2:0))*(1+.04*perk('speed'));
+  for(let k=0;k<5;k++)out[k]+=pr;
+  return out;
+}
+function calcScore(p){
+  let a=0,b=0;for(let k=0;k<5;k++){a+=p.tgt[k]*Math.min(1.8,p.pts[k]/p.tgt[k]);b+=p.tgt[k]}
+  const Q=a/b, c=compat(p.g,p.t);
+  const team=S.staff.filter(e=>e.pj===p.id);
+  let tq=1;const used=new Set();for(const e of team)for(const t of e.tr)if(TRAITS[t].q&&!used.has(t)){used.add(t);tq*=TRAITS[t].q}tq=Math.min(1.15,tq);
+  const trend=(S.trend.g===p.g?1.07:1)*(S.trend.t===p.t?1.07:1);
+  const fat=team.length?team.reduce((x,e)=>x+e.fat,0)/team.length:0;
+  const raw=6.2*Q*c*(1+S.pres.plan*.004)*tq*(1+genreLv(p.g)*.03+themeLv(p.t)*.02)*trend*(fat>70?.92:1)*Math.min(1,.55+projProg(p)*.45);
+  return clamp(1+9*(1-Math.exp(-raw/6.5))+R(-.35,.35),1,10);
+}
+function releaseProject(p){
+  S.proj=S.proj.filter(x=>x!==p);
+  for(const e of S.staff)if(e.pj===p.id)e.pj=null;
+  if(p.kind==='contract'){
+    S.money+=p.reward;S.stat.rev+=p.reward;S.revAll+=p.reward;S.stat.contracts++;S.fame+=1;
+    logm(`受託完了：『${p.title}』報酬 ${yen(p.reward)}`,'gd');
+    scene({title:'受託案件、完了！',html:`『${esc(p.title)}』を納品しました。\n報酬 <b class="amber">${yen(p.reward)}</b> が入金されました。`});
+    return;
+  }
+  const score=calcScore(p);const sc=SCALES[p.sc],pf=PLATS[p.pf];
+  const hype=1+p.hype*.08;
+  const trendS=(S.trend.g===p.g?1.15:1)*(S.trend.t===p.t?1.15:1);
+  const act=S.released.filter(x=>!x.done).length;
+  let units=(900+Math.pow(S.fans,.8)*.3)*sc.u*pf.u*Math.pow(score/6,3.2)*hype*trendS*R(.8,1.25)*(1+.06*perk('sales'))*(1+.02*S.rd.mkt)*(1+Math.min(.3,S.club.n*.002))/(1+.1*act);
+  units=Math.round(units);
+  const price=pf.price*(p.sc>=2?1:1);
+  const g={id:p.id,title:p.title,g:p.g,t:p.t,pf:p.pf,sc:p.sc,score:+score.toFixed(1),units,price,age:0,sold:0,rev:0,week:S.week,done:false};
+  S.released.unshift(g);
+  const tf=S.staff.some(e=>e.tr.includes('idol'))?1.05:1;
+  const fg=Math.round(Math.max(0,score-5.5)*sc.fame*(1+.08*fac('pr'))*tf);
+  S.fame+=fg;S.fans+=Math.round(units*(score>=6?.2:.04)/(1+S.fans/3e6));
+  S.gexp[p.g]++;S.texp[p.t]++;S.known[p.g+'-'+p.t]=true;S.stat.games++;
+  if(score>=8)S.stat.hits++;S.stat.best=Math.max(S.stat.best,score);
+  for(const e of S.staff)gainExp(e,15*(1+p.sc));
+  const word=score>=9?'神ゲー！！':score>=8?'大ヒットの予感！':score>=7?'好評スタート':score>=5.5?'まずまずの評価':'厳しい評価…';
+  logm(`発売：『${p.title}』スコア ${score.toFixed(1)}（${word}）`,score>=7?'gd':score<5.5?'bd':'hi');
+  scene({title:'発売！ レビュー結果',html:`『${esc(p.title)}』\n<span class="mute">${GENRES[p.g].n}×${THEMES[p.t]}（相性 ${compatMark(compat(p.g,p.t))}）／${pf.n}／${sc.n}</span>\n\n<b style="font-size:24px" class="rose">${score.toFixed(1)} / 10</b>　${word}\n初動予測 <b>${num(units)}本</b>・知名度 +${fg}`});
+}
+function stepProjects(){
+  for(const p of S.proj.slice()){
+    const out=projOut(p);for(let k=0;k<5;k++)p.pts[k]+=out[k];
+    p.age=(p.age||0)+1;
+    if(p.kind==='contract'&&S.week>=p.deadline){
+      S.proj=S.proj.filter(x=>x!==p);for(const e of S.staff)if(e.pj===p.id)e.pj=null;
+      S.fame=Math.max(0,S.fame-3);logm(`受託案件『${p.title}』は納期に間に合わなかった…`,'bd');continue}
+    if(projProg(p)>=1)releaseProject(p);
+  }
+}
+function stepSales(){
+  let tot=0;
+  for(const g of S.released){
+    if(g.done)continue;const d=.68;const sh=(1-d)*Math.pow(d,g.age);
+    const u=Math.round(g.units*sh*(g.age===0?1:1));const rev=u*g.price*(1+.06*perk('sales')*0);
+    g.sold+=u;g.rev+=rev;g.age++;tot+=rev;
+    if(g.age>=14||sh<.002){g.done=true}
+  }
+  S.money+=tot;S.stat.rev+=tot;S.revAll+=tot;return tot;
+}
+function genContracts(){
+  S.contracts=[];
+  const base=250*(1+S.office*1.9+S.staff.length*.12);
+  for(let i=0;i<3;i++){
+    const T=Math.round(base*R(.7,1.6));const w=[0,0,0,0,0].map(()=>R(.5,1.5));const ws=w.reduce((a,b)=>a+b,0);
+    S.contracts.push({id:S.nextId++,kind:'contract',title:pick(['企業PRゲーム','学習アプリ','スマホ運用代行','アニメ連動ミニゲーム','販促キャンペーンアプリ','既存タイトルの移植','キャラ素材の制作'])+'の受託',
+      tgt:w.map(x=>Math.round(T*x/ws)),pts:[0,0,0,0,0],reward:Math.round(T*R(1500,2200)),dl:RI(6,10),hype:0});
+  }
+}
+function takeContract(id){
+  if(S.proj.length>=slotsMax())return toast('開発スロットが埋まっています');
+  const i=S.contracts.findIndex(c=>c.id===id);if(i<0)return;const c=S.contracts.splice(i,1)[0];
+  c.deadline=S.week+c.dl;c.start=S.week;S.proj.push(c);
+  for(const e of S.staff)if(!e.pj)e.pj=c.id;
+  logm(`受託案件を受注：${c.title}`,'hi');save();render();
+}
+function cancelProject(id){
+  const p=S.proj.find(x=>x.id===id);if(!p)return;S.proj=S.proj.filter(x=>x!==p);
+  for(const e of S.staff)if(e.pj===id)e.pj=null;logm(`『${p.title||p.kind}』の開発を中止した`,'bd');save();render();
+}
+function forceRelease(id){const p=S.proj.find(x=>x.id===id);if(!p||p.kind!=='game')return;if(projProg(p)<.7)return toast('進捗70%以上で妥協リリースできます');releaseProject(p);checkAch();save();render()}
+function pr(id,kind){
+  const p=S.proj.find(x=>x.id===id);if(!p)return;
+  if(kind==='hype'){if(p.hype>=10)return toast('これ以上は盛り上がりません');if(S.ap<1)return useAP();if(!spend(300000*(1+S.office)))return;useAP();p.hype++;gainPres('net',2);toast('宣伝！ 期待度 '+p.hype)}
+  save();render();
+}
+function assignAll(id){for(const e of S.staff)if(!e.pj)e.pj=id;save();render()}
+function unassignAll(id){for(const e of S.staff)if(e.pj===id)e.pj=null;save();render()}
+function toggleAssign(eid,pid){const e=empById(eid);if(!e)return;e.pj=e.pj===pid?null:pid;save();render()}
+
+/* ====== company / president actions ====== */
+function presAct(kind){
+  if(kind==='plan'){if(!useAP())return;gainPres('plan',6);toast('企画会議。企画力が上がった')}
+  else if(kind==='biz'){if(S.ap<1)return useAP();if(!spend(100000))return;useAP();gainPres('biz',8);toast('経営セミナーに参加した')}
+  else if(kind==='net'){if(S.ap<1)return useAP();if(!spend(50000))return;useAP();gainPres('net',8);if(Math.random()<.35+S.pres.net/200){S.conne++;toast('営業まわりで新しいコネを得た')}else toast('営業まわり。手応えはあった')}
+  else if(kind==='party'){
+    const fs=S.staff.filter(e=>e.g==='F');if(!fs.length)return toast('女性社員がいません');
+    const c=4000*S.staff.length;if(S.ap<1)return useAP();if(!spend(c))return;useAP();
+    const m=(1+S.pres.cha*.01+perk('charm')*.08);
+    for(const e of fs){e.mot=Math.min(100,e.mot+8);e.fat=Math.max(0,e.fat-6);addAff(e,3.5*m*tMul(e,'aff'))}
+    gainPres('cha',3);toast(`全員ランチ！ 女性社員${fs.length}人の好感度アップ`);
+  }
+  else if(kind==='market'){
+    if(S.ap<1)return useAP();if(!spend(200000))return;useAP();
+    const un=[];for(let g=0;g<8;g++)for(let t=0;t<8;t++)if(!S.known[g+'-'+t])un.push(g+'-'+t);
+    if(!un.length)return toast('調べる組み合わせはありません');
+    let n=0;while(n<3&&un.length){S.known[un.splice(RI(0,un.length-1),1)[0]]=true;n++}toast('市場調査で相性を'+n+'件発見した');
+  }
+  checkAch();save();render();
+}
+function buyOffice(){
+  const n=OFFICES[S.office+1];if(!n)return;if(!spend(n.cost))return;S.office++;logm(`${n.n}に移転した！`,'hi');
+  scene({title:'オフィス移転',html:`<b>${n.n}</b>に引っ越しました。\n定員 ${n.cap}名／開発スロット ${SLOTS[S.office]}`});checkAch();save();render();
+}
+function buyFac(id){
+  const f=FACS.find(x=>x.id===id);const lv=fac(id);if(lv>=FAC_MAX)return;if(S.office<f.min)return toast('オフィス拡張で解放');
+  if(!spend(facCost(f,lv)))return;S.fac[id]=lv+1;toast(f.n+' Lv'+(lv+1));checkAch();save();render();
+}
+
+/* ====== achievements ====== */
+const ACHS=[
+ {id:'h1',n:'はじめの一歩',d:'社員を1人採用',c:()=>S.stat.hired>=1,r:{conne:1}},
+ {id:'h5',n:'小さな会社',d:'同時に5人在籍',c:()=>S.staff.length>=5,r:{money:500000}},
+ {id:'h12',n:'中堅スタジオ',d:'同時に12人在籍',c:()=>S.staff.length>=12,r:{conne:2}},
+ {id:'h24',n:'大所帯',d:'同時に24人在籍',c:()=>S.staff.length>=24,r:{conne:3}},
+ {id:'h48',n:'千客万来の巨大スタジオ',d:'同時に50人在籍',c:()=>S.staff.length>=50,r:{conne:6}},
+ {id:'h100',n:'ゲーム業界の巨人',d:'同時に100人在籍',c:()=>S.staff.length>=100,r:{conne:10}},
+ {id:'f50',n:'女帝のスタジオ',d:'女性社員が50人在籍',c:()=>S.staff.filter(e=>e.g==='F').length>=50,r:{conne:8}},
+ {id:'l20',n:'ハーレム帝国',d:'恋人が同時に20人',c:()=>lovers().length>=20,r:{conne:12}},
+ {id:'f10',n:'女の園',d:'女性社員が10人在籍',c:()=>S.staff.filter(e=>e.g==='F').length>=10,r:{conne:2}},
+ {id:'f20',n:'ガールズ・パラダイス',d:'女性社員が20人在籍',c:()=>S.staff.filter(e=>e.g==='F').length>=20,r:{conne:4}},
+ {id:'fa',n:'女性だけの城',d:'10人以上在籍で全員が女性',c:()=>S.staff.length>=10&&S.staff.every(e=>e.g==='F'),r:{conne:5}},
+ {id:'g1',n:'処女作',d:'ゲームを1本発売',c:()=>S.stat.games>=1,r:{conne:1}},
+ {id:'g5',n:'シリーズ化の足音',d:'ゲームを5本発売',c:()=>S.stat.games>=5,r:{money:1000000}},
+ {id:'g20',n:'量産体制',d:'ゲームを20本発売',c:()=>S.stat.games>=20,r:{conne:3}},
+ {id:'g50',n:'ゲーム工場',d:'ゲームを50本発売',c:()=>S.stat.games>=50,r:{conne:6}},
+ {id:'s8',n:'ヒットメーカー',d:'スコア8.0以上を出す',c:()=>S.stat.best>=8,r:{conne:2}},
+ {id:'s9',n:'神ゲー',d:'スコア9.0以上を出す',c:()=>S.stat.best>=9,r:{conne:4}},
+ {id:'s95',n:'殿堂入り',d:'スコア9.5以上を出す',c:()=>S.stat.best>=9.5,r:{conne:8}},
+ {id:'k5',n:'ヒット常連',d:'スコア8.0以上を5本',c:()=>S.stat.hits>=5,r:{conne:3}},
+ {id:'m1',n:'100万円プレイヤー',d:'累計売上 100万円',c:()=>S.stat.rev>=1e6,r:{}},
+ {id:'m2',n:'億の男',d:'累計売上 1億円',c:()=>S.stat.rev>=1e8,r:{conne:2}},
+ {id:'m3',n:'百億クラブ',d:'累計売上 100億円',c:()=>S.stat.rev>=1e10,r:{conne:5}},
+ {id:'m4',n:'兆の世界',d:'累計売上 1兆円',c:()=>S.stat.rev>=1e12,r:{conne:10}},
+ {id:'fa1',n:'名前が知られてきた',d:'知名度 100',c:()=>S.fame>=100,r:{conne:1}},
+ {id:'fa2',n:'業界の有名人',d:'知名度 1,000',c:()=>S.fame>=1000,r:{conne:3}},
+ {id:'fa3',n:'国民的スタジオ',d:'知名度 10,000',c:()=>S.fame>=10000,r:{conne:6}},
+ {id:'o2',n:'一棟貸し',d:'オフィスを3段階目に',c:()=>S.office>=2,r:{}},
+ {id:'o4',n:'空にそびえる夢',d:'超高層タワーに移転',c:()=>S.office>=4,r:{conne:5}},
+ {id:'fc',n:'設備マニア',d:'設備のどれかをLv5に',c:()=>FACS.some(f=>fac(f.id)>=5),r:{conne:2}},
+ {id:'l1',n:'初恋',d:'初めて想いに応える',c:()=>S.stat.lovers>=1,r:{conne:2}},
+ {id:'l3',n:'ハーレムの入り口',d:'恋人が同時に3人',c:()=>lovers().length>=3,r:{conne:3}},
+ {id:'l5',n:'ハーレム社長',d:'恋人が同時に5人',c:()=>lovers().length>=5,r:{conne:5}},
+ {id:'l10',n:'ハーレム王',d:'恋人が同時に10人',c:()=>lovers().length>=10,r:{conne:10}},
+ {id:'d10',n:'休日のプロ',d:'おでかけを10回',c:()=>S.stat.dates>=10,r:{conne:2}},
+ {id:'d50',n:'デートスポット制覇',d:'おでかけを50回',c:()=>S.stat.dates>=50,r:{conne:5}},
+ {id:'gf',n:'プレゼント魔',d:'プレゼントを30回',c:()=>S.stat.gifts>=30,r:{conne:2}},
+ {id:'ty',n:'全タイプ制覇',d:'8つの性格すべての女性を採用',c:()=>Object.keys(S.typeDex).length>=8,r:{conne:4}},
+ {id:'dx6',n:'名物社員コレクター',d:'特別な社員を6人集める',c:()=>Object.keys(S.dex).length>=6,r:{conne:4}},
+ {id:'dx12',n:'全員集合',d:'特別な社員を全員集める',c:()=>Object.keys(S.dex).length>=NAMED.length,r:{conne:10}},
+ {id:'st5',n:'限界を超えて',d:'社員を★3に限界突破',c:()=>S.staff.some(e=>e.star>=3),r:{conne:3}},
+ {id:'lv30',n:'ベテラン',d:'社員がLv30に到達',c:()=>S.staff.some(e=>e.lv>=30),r:{conne:2}},
+ {id:'k1',n:'はじめての子',d:'子供が生まれる',c:()=>S.stat.kids>=1,r:{conne:2}},
+ {id:'k10',n:'子だくさん',d:'子供が10人',c:()=>S.stat.kids>=10,r:{conne:4}},
+ {id:'k30',n:'大家族スタジオ',d:'子供が30人',c:()=>S.stat.kids>=30,r:{conne:6}},
+ {id:'k100',n:'ベビーブーム社',d:'子供が100人',c:()=>S.stat.kids>=100,r:{conne:12}},
+ {id:'b1',n:'はじめてのお祝い',d:'社員の誕生日を祝う',c:()=>S.stat.bday>=1,r:{conne:1}},
+ {id:'b20',n:'お祝い上手',d:'誕生日を20回祝う',c:()=>S.stat.bday>=20,r:{conne:3}},
+ {id:'ch50',n:'チョコまみれ',d:'チョコを50個もらう',c:()=>S.stat.choco>=50,r:{conne:3}},
+ {id:'club',n:'ファンクラブ結成',d:'ファンクラブ会員30人',c:()=>S.club.n>=30,r:{conne:3}},
+ {id:'out1',n:'社外にもモテる',d:'社外からの告白を受け入れる',c:()=>S.stat.outs>=1,r:{conne:3}},
+ {id:'out10',n:'引く手あまた',d:'社外から10人が加わる',c:()=>S.stat.outs>=10,r:{conne:8}},
+ {id:'trip',n:'社員旅行の思い出',d:'社員旅行に行く',c:()=>S.stat.trips>=1,r:{conne:2}},
+ {id:'sec',n:'専属秘書',d:'専用の秘書席を導入',c:()=>!!S.room.items.sec,r:{conne:1}},
+ {id:'hr10',n:'ドキドキの日々',d:'💗を10回',c:()=>S.stat.heart>=10,r:{conne:2}},
+ {id:'hr100',n:'ときめきマスター',d:'💗を100回',c:()=>S.stat.heart>=100,r:{conne:6}},
+ {id:'ct',n:'下請けの鬼',d:'受託案件を10件完了',c:()=>S.stat.contracts>=10,r:{conne:2}},
+ {id:'rb',n:'二周目の社長',d:'再起業を経験',c:()=>S.legacy.runs>=1,r:{conne:3}}];
+function checkAch(){
+  for(const a of ACHS){
+    if(S.ach[a.id])continue;
+    let ok=false;try{ok=a.c()}catch(e){}
+    if(ok){S.ach[a.id]=S.week+1;if(a.r.conne)S.conne+=a.r.conne;if(a.r.money)S.money+=a.r.money;
+      logm(`実績「${a.n}」を達成！`,'hi');toast('🏆 実績「'+a.n+'」');}
+  }
+}
+
+/* ====== events ====== */
+const EVENTS=[
+ {id:'bug',w:3,ok:()=>S.proj.length>0,b:()=>({t:'サーバー障害',x:'開発サーバーが落ちた！ 復旧作業が必要だ。',ch:[
+   {l:'外注して即復旧（30万円）',f:()=>{if(S.money>=300000){S.money-=300000;return'無事に復旧した。'}for(const e of S.staff)e.fat=Math.min(100,e.fat+10);return'資金が足りず、社員が徹夜で復旧した。（疲労+10）'}},
+   {l:'社員に任せる',f:()=>{for(const e of S.staff)e.fat=Math.min(100,e.fat+12);return'社員が徹夜で復旧した。（疲労+12）'}}]})},
+ {id:'press',w:3,ok:()=>S.fame>=5,b:()=>({t:'取材の依頼',x:'ゲーム雑誌から取材依頼が来た。',ch:[
+   {l:'受ける（行動力1）',f:()=>{if(S.ap<1)return'行動力が足りず、断ってしまった。';S.ap--;const f=Math.round(3+S.fame*.04);S.fame+=f;S.conne++;return`取材が掲載された。知名度 +${f}、コネ +1`}},
+   {l:'断る',f:()=>'今回は見送った。'}]})},
+ {id:'nomi',w:3,ok:()=>S.staff.length>=3,b:()=>({t:'社員の飲み会',x:'社員たちが「たまには飲みに行きましょう」と盛り上がっている。',ch:[
+   {l:'奢る（'+yen(60000+S.staff.length*20000)+'）',f:()=>{const c=60000+S.staff.length*20000;if(S.money<c)return'お金が足りず、割り勘になった。';S.money-=c;for(const e of S.staff){e.mot=Math.min(100,e.mot+10);addAff(e,e.g==='F'?3:1)}return'大いに盛り上がった。（全員のやる気+10、好感度+3）'}},
+   {l:'今回はパス',f:()=>{for(const e of S.staff)e.mot=Math.max(0,e.mot-3);return'少し残念そうだ。（やる気-3）'}}]})},
+ {id:'poach',w:2,ok:()=>S.staff.some(e=>e.rar>=2&&e.mot<65&&!e.lover),b:()=>{const e=S.staff.filter(e=>e.rar>=2&&e.mot<65&&!e.lover)[0];return{t:'引き抜きの噂',x:`${e.name} に他社から引き抜きの話が来ているらしい。`,ch:[
+   {l:'昇給して引き止める',f:()=>{e.raise=Math.min(5,e.raise+1);e.mot=Math.min(100,e.mot+25);addAff(e,4);return`${e.name} は残ってくれた。（月給 ${yen(salOf(e))}）`}},
+   {l:'引き止めない',f:()=>{S.staff=S.staff.filter(x=>x!==e);return`${e.name} は退社してしまった…`}}]}}},
+ {id:'fan',w:3,ok:()=>S.stat.games>=1,b:()=>({t:'ファンレター',x:'発売したゲームへのファンレターが山のように届いた。',ch:[
+   {l:'社員全員に読んで聞かせる',f:()=>{for(const e of S.staff)e.mot=Math.min(100,e.mot+12);S.fame+=2;return'みんなやる気満々だ。（やる気+12、知名度+2）'}}]})},
+ {id:'grant',w:2,ok:()=>S.week>=8,b:()=>{const m=Math.round(1000000*(1+S.office*4));return{t:'助成金の採択',x:`クリエイター支援の助成金に採択された。${yen(m)}が振り込まれる。`,ch:[{l:'ありがたく受け取る',f:()=>{S.money+=m;return'資金が増えた。'}}]}}},
+ {id:'show',w:2,ok:()=>S.fame>=30&&S.proj.some(p=>p.kind==='game'),b:()=>{const c=1500000*(1+S.office*2);return{t:'ゲームショウへの出展',x:`開発中のタイトルを出展しないかと誘われた。（費用 ${yen(c)}）`,ch:[
+   {l:'出展する',f:()=>{if(S.money<c)return'資金が足りず、見送った。';S.money-=c;for(const p of S.proj)if(p.kind==='game')p.hype=Math.min(10,p.hype+3);S.fame+=10;return'大盛況！ 期待度が大きく上がった。（期待度+3、知名度+10）'}},
+   {l:'見送る',f:()=>'今回は見送った。'}]}}},
+ {id:'cold',w:2,ok:()=>S.staff.length>=2,b:()=>{const e=pick(S.staff);return{t:'体調不良',x:`${e.name} が熱を出してしまった。`,ch:[
+   {l:'休ませる（1週休暇）',f:()=>{e.leave=true;e.mot=Math.min(100,e.mot+6);if(e.g==='F')addAff(e,3);return'ゆっくり休んでもらった。（好感度+3）'}},
+   {l:'無理をお願いする',f:()=>{e.fat=Math.min(100,e.fat+30);e.mot=Math.max(0,e.mot-12);return'無理をさせてしまった。（疲労+30、やる気-12）'}}]}}},
+ {id:'consult',w:4,ok:()=>S.staff.some(e=>e.g==='F'&&stageOf(e)>=2),b:()=>{const e=pick(S.staff.filter(e=>e.g==='F'&&stageOf(e)>=2));return{t:'相談したいこと',x:`${e.name} が仕事終わりに声をかけてきた。「社長、少し相談してもいいですか？」`,ch:[
+   {l:'親身に聞く',f:()=>{addAff(e,6);e.mot=Math.min(100,e.mot+10);return'信頼が深まった。（好感度+6）'}},
+   {l:'ご飯に誘う（3万円）',f:()=>{if(S.money<30000)return'財布が心もとなくて断念した。';S.money-=30000;addAff(e,10);return'楽しい時間を過ごした。（好感度+10）'}},
+   {l:'後にしてもらう',f:()=>{addAff(e,-2);return'少し寂しそうだ。（好感度-2）'}}]}}},
+ {id:'jeal',w:5,ok:()=>harmony()<70&&lovers().length>=6,b:()=>{const a=lovers();return{t:'ジェラシー事件',x:'社内の空気がピリピリしている。社長が特定の子ばかり構っていると噂になっているようだ。',ch:[
+   {l:'全員にスイーツを配る（8万円）',f:()=>{if(S.money<80000)return'お金が足りず、場はおさまらなかった。（やる気-8）';S.money-=80000;for(const e of S.staff)e.mot=Math.min(100,e.mot+8);return'甘いもので機嫌が直った。（全員のやる気+8）'}},
+   {l:'一人ずつ丁寧に話をする（行動力2）',f:()=>{if(S.ap<2)return'時間が足りなかった。（恋人のやる気-10）';S.ap-=2;for(const e of a){addAff(e,3);e.mot=Math.min(100,e.mot+8)}return'誠実に向き合った。（恋人の好感度+3）'}},
+   {l:'笑ってごまかす',f:()=>{for(const e of a)e.mot=Math.max(0,e.mot-10);return'火に油を注いだ。（恋人のやる気-10）'}}]}}},
+ {id:'rival',w:4,ok:()=>S.staff.filter(e=>e.g==='F'&&e.aff>=45).length>=2,b:()=>{const f=S.staff.filter(e=>e.g==='F'&&e.aff>=45).sort(()=>Math.random()-.5);const a=f[0],b2=f[1];const A=a.name.split(' ')[1]||a.name,B=b2.name.split(' ')[1]||b2.name;const w=pick(['お昼ごはんの席','差し入れの順番','今夜の飲みの誘い','お弁当対決','社長の隣の席']);return{t:'社長を巡る小さな戦い',x:`${A}と${B}が、${w}を巡って火花を散らしている。「社長は私とご一緒するんです！」「いえ、私です！」`,ch:[
+   {l:`${A}を選ぶ`,f:()=>{bulkAff(a,8);a.mot=Math.min(100,a.mot+10);b2.mot=Math.max(0,b2.mot-6);bulkAff(b2,1);return`${A}は大喜び。${B}は少し拗ねている。（${A}の好感度+8）`}},
+   {l:`${B}を選ぶ`,f:()=>{bulkAff(b2,8);b2.mot=Math.min(100,b2.mot+10);a.mot=Math.max(0,a.mot-6);bulkAff(a,1);return`${B}は大喜び。${A}は少し拗ねている。（${B}の好感度+8）`}},
+   {l:'みんなで一緒に！（2万円）',f:()=>{if(S.money<20000)return'お金が足りず、二人とも不満げだ。';S.money-=20000;for(const e of [a,b2]){bulkAff(e,4);e.mot=Math.min(100,e.mot+6)}return'三人で楽しく過ごした。（二人とも好感度+4）'}}]}}},
+ {id:'rumor',w:2,ok:()=>S.fame>=50,b:()=>({t:'ネット炎上',x:'開発中のゲームについて根拠のない噂がSNSで広まっている。',ch:[
+   {l:'公式声明を出す（行動力1）',f:()=>{if(S.ap<1)return'対応が遅れ、知名度が下がった。（-8）';S.ap--;S.fame+=3;return'誠実な対応が評価された。（知名度+3）'}},
+   {l:'静観する',f:()=>{S.fame=Math.max(0,S.fame-8);return'じわじわと評判が落ちた。（知名度-8）'}}]})}];
+function seasonal(){
+  const c=cal();
+  if(c.wk===2&&c.mo===2){const l=S.staff.filter(e=>e.g==='F'&&e.aff>=28);
+    if(l.length){const n=l.reduce((a,e)=>a+(e.lover?3:e.aff>=62?2:1),0);S.stat.choco+=n;S.stat.recv+=n;for(const e of l)bulkAff(e,e.lover?4:2);
+      scene({title:'🍫 バレンタインデー',html:`${l.length}人の社員から、合計 <b class="rose">${n}個</b> のチョコレートをもらった！\n社長室の机が、チョコの山になっている。\n（好感度アップ）`})}}
+  if(c.wk===2&&c.mo===3){const l=S.staff.filter(e=>e.g==='F'&&e.aff>=28);
+    if(l.length){const opt=(label,per,aff,pri)=>({l:`${label}（${yen(per*l.length)}）`,p:pri,f:()=>{const c2=per*l.length;if(S.money<c2)return toast('資金が足りません');S.money-=c2;for(const e of l)bulkAff(e,aff);logm(`ホワイトデーのお返し（${l.length}人）`,'gd');toast('お返し大作戦、成功！ 好感度+'+aff);save();render()}});
+      scene({title:'🎁 ホワイトデー大作戦',html:`${l.length}人にお返しをする日。予算をどうする？`,btns:[opt('義理の小さなお菓子',1000,2),opt('心を込めた贈り物',5000,6,1),opt('高級ブランドの贈り物',15000,12),{l:'今年はスルー',f:()=>{for(const e of l)e.aff=Math.max(0,e.aff-3)}}]})}}
+  if(c.wk===2&&c.mo===8){for(const e of S.staff){e.mot=Math.min(100,e.mot+8);e.fat=Math.max(0,e.fat-15)}scene({title:'社内納涼会',html:'屋上でバーベキュー納涼会を開いた。\n全員のやる気が上がり、疲労が抜けた。'})}
+  if(c.wk===3&&c.mo===12){for(const e of S.staff){e.mot=Math.min(100,e.mot+10);addAff(e,e.g==='F'?2:1)}scene({title:'忘年会',html:'一年お疲れさま！ 大いに盛り上がった。\n（全員のやる気+10・好感度+2）'})}
+}
+function rollEvent(){
+  if(S.week<4||Math.random()>.32)return;
+  const ok=EVENTS.filter(e=>{try{return e.ok()}catch(x){return false}});if(!ok.length)return;
+  const ev=ok[wpick(ok.map(e=>e.w))];const b=ev.b();
+  scene({title:b.t,html:esc(b.x),btns:b.ch.map(c=>({l:c.l,f:()=>{const r=c.f();logm(`${b.t}：${r}`);scene({title:b.t,html:esc(r)});save();render()}}))});
+}
+function awards(){
+  const y0=S.week-47;const gs=S.released.filter(g=>g.week>y0);if(!gs.length)return;
+  const best=gs.reduce((a,b)=>a.score>=b.score?a:b);const m=1+S.office;
+  const tier=best.score>=9?0:best.score>=8?1:best.score>=7?2:-1;if(tier<0)return;
+  const nm=['年間ゲーム大賞','優秀賞','奨励賞'][tier],pz=[20e6,5e6,1e6][tier]*m,fg=[60,25,8][tier],cn=[4,2,1][tier];
+  S.money+=pz;S.fame+=fg;S.conne+=cn;logm(`『${best.title}』が${nm}を受賞！`,'hi');
+  scene({title:'🏆 '+nm,html:`『${esc(best.title)}』（${best.score.toFixed(1)}）が${nm}に輝きました！\n賞金 ${yen(pz)}／知名度 +${fg}／コネ +${cn}`});
+}
+
+/* ====== weekly tick ====== */
+function nextWeek(){
+  if(S.over)return;
+  stepProjects();
+  const rev=stepSales();
+  // employees
+  const births=[];
+  for(const e of S.staff){
+    const proj=e.pj&&S.proj.some(p=>p.id===e.pj);const work=proj&&!e.leave;
+    if(e.leave){e.fat=Math.max(0,e.fat-35-4*fac('nap')-3*fac('spa'));e.mot=Math.min(100,e.mot+5+2*fac('spa'))}
+    else if(work)e.fat=Math.min(100,e.fat+8*tMul(e,'fat')*(1-.06*fac('coffee')));
+    else e.fat=Math.max(0,e.fat-10-3*fac('nap'));
+    const tgt=40+e.aff*.4+2*fac('plant')+3*fac('spa')+(e.lover?10:0)+(S.room.items.chand?2:0);
+    e.mot+=(tgt-e.mot)*.2;if(e.fat>80)e.mot-=3;if(S.money<0)e.mot-=2;e.mot=clamp(e.mot,0,100);
+    gainExp(e,work?25:8);
+    if(fac('lounge')&&e.g==='F')addAff(e,.3*fac('lounge'),false);
+    if(!e.lover&&S.week-e.last>=8&&e.aff>0)e.aff=Math.max(0,e.aff-.4);
+    e.leave=false;e.act={n:0};
+    if(e.mat>0){e.leave=true;e.mat--}
+    if(e.preg>0){e.preg--;if(e.preg===0){const n=Math.random()<.08?2:1;e.kids=(e.kids||0)+n;S.stat.kids+=n;e.mat=Math.max(1,3-fac('nursery'));e.leave=true;e.mot=Math.min(100,e.mot+15);births.push({e,n})}}
+    if(e.inv&&S.week-e.invW>=2)e.inv=null;
+    if(e.g==='F'&&e.aff>=STAGES[4]&&!e.inv&&Math.random()<(e.lover?.35:.25)){e.inv=pick(canChild(e)?['lunch','date','night','night']:['lunch','date']);e.invW=S.week+1}
+  }
+  if(births.length<=2)for(const b of births)scene({who:b.e,title:'新しい命',html:esc(`${b.e.name.split(' ')[1]||b.e.name}が元気な赤ちゃん${b.n===2?'（双子！）':''}を出産した。\n母子ともに健康。しばらく産休に入る。`)});
+  else scene({title:'ベビーラッシュ',html:`今週は ${births.length}人が出産した。\n新しい命 <b class="rose">${births.reduce((a,b)=>a+b.n,0)}人</b> が誕生！\n社内が一気に賑やかになった。`});
+  for(const b of births)logm(`${b.e.name} が出産した（子供 ${b.e.kids}人）`,'gd');
+  S.ap=apMax();
+  S.week++;
+  const c=cal();
+  if(c.wk===1){ // month start: pay salaries for last month
+    const sal=S.staff.reduce((a,e)=>a+salOf(e),0),rent=OFFICES[S.office].rent;
+    S.money-=sal+rent;logm(`月次支払い：給与 ${yen(sal)}・家賃 ${yen(rent)}`);
+    genContracts();clubStep();
+    S.cand=S.cand.filter(x=>x.exp>S.week);
+  }
+  if(S.week>=S.trend.until){S.trend={g:RI(0,7),t:RI(0,7),until:S.week+RI(8,14)};logm(`流行の変化：${GENRES[S.trend.g].n}と${THEMES[S.trend.t]}が人気`)}
+  if(S.sec&&S.room.items.sec&&empById(S.sec))bulkAff(empById(S.sec),1);
+  birthdays();
+  morningGreet();
+  seasonal();
+  outsiderRoll();
+  if(S.week%48===0)awards();
+  rollEvent();
+  checkAch();
+  if(S.money<-(3000000*(1+S.office*3))){S.over=true;G.auto=false;gameOver()}
+  save();
+}
+function skipGreet(){SQ=SQ.filter(o=>!o.greet)}
+function morningGreet(){
+  const el=S.staff.filter(e=>e.g==='F'&&e.aff>=45&&!(e.mat>0)).sort(()=>Math.random()-.5);
+  S.greetN=el.length;S.greet=[];
+  el.forEach((e,i)=>{
+    const t=e.aff>=78?2:e.aff>=62?1:0;const nm=e.name.split(' ')[1]||e.name;
+    const text=KISS_ACT[t].replace('{n}',nm)+KISS_LINE[e.type];
+    bulkAff(e,.4);e.mot=Math.min(100,e.mot+2);
+    if(i<5)S.greet.push({id:e.id,text});
+    if(!G.auto)scene({who:e,greet:true,title:`💋 朝の挨拶（${i+1}/${el.length}）`,html:esc(text),
+      btns:[{l:'次へ',p:1,f:()=>{}},...(i<el.length-1?[{l:'残りの挨拶をスキップ',f:skipGreet}]:[])]});
+  });
+  if(el.length)logm(`朝の挨拶：${el[0].name}${el.length>1?`ほか${el.length-1}人`:''}がキスで迎えてくれた`);
+}
+function gameOver(){
+  scene({title:'倒産…',html:'資金が尽き、スタジオは倒産してしまった。\nしかし、経験は無駄にならない。\n再起業すれば、これまでの実績や図鑑は引き継がれます。',btns:[{l:'再起業する（レガシー半減）',p:1,f:()=>doReborn([],true)}]});
+}
+
+/* ====== reborn ====== */
+const canReborn=()=>S.stat.rev>=2e8||S.fame>=300;
+const legacyGain=()=>Math.floor(Math.sqrt(S.stat.rev/1e6)*1.2+S.fame/40+S.stat.games*.5);
+function carryCap(){return 1+perk('carry')}
+function doReborn(ids,bankrupt){
+  const gain=Math.floor(legacyGain()*(bankrupt?.5:1));
+  const carry=S.staff.filter(e=>ids.includes(e.id));
+  const L=S.legacy;L.pts+=gain;L.runs++;
+  const prev=S;
+  S=newState(prev);S.legacy=L;S.revAll=prev.revAll;
+  for(const e of carry){e.pj=null;e.leave=false;e.fat=0;e.mot=70;e.id=S.nextId++;S.staff.push(e)}
+  S.stat.hired=carry.length;S.stat.kids=carry.reduce((a,e)=>a+(e.kids||0),0);
+  G.tab='home';G.empId=null;
+  genContracts();checkAch();
+  logm(`再起業！ レガシーポイント +${gain}`,'hi');
+  save();closeModal();render();
+  scene({title:'再起業',html:`新しいスタジオを立ち上げた。\nレガシーポイント <b class="amber">+${gain}</b> を獲得。\nレガシー画面で永続強化に使えます。`});
+}
+function buyPerk(id){
+  const p=PERKS.find(x=>x.id===id),l=perk(id);if(l>=p.max)return;const c=p.c(l);
+  if(S.legacy.pts<c)return toast('レガシーポイントが足りません');
+  S.legacy.pts-=c;S.legacy.perks[id]=l+1;
+  if(id==='cash')S.money+=5000000; if(id==='conne')S.conne+=2; if(id==='ap')S.ap++;
+  save();render();
+}
+
+const RDS=[{id:'eng',n:'自社ゲームエンジン',d:'開発の成果 +2%/Lv'},{id:'mkt',n:'マーケティング基盤',d:'ゲームの売上 +2%/Lv'},{id:'edu',n:'人材育成プログラム',d:'社員の経験値 +3%/Lv'}];
+const rdCost=lv=>Math.round(2000000*Math.pow(1.3,lv));
+function buyRD(id){const lv=S.rd[id]||0;if(lv>=99)return;if(!spend(rdCost(lv)))return;S.rd[id]=lv+1;toast('研究開発 Lv'+(lv+1));save();render()}
+
+/* ====== v3 features ====== */
+function heartEvent(id){
+  const e=empById(id);if(!e||e.g!=='F'||e.aff<STAGES[3])return;
+  const left=2-(S.week-e.heartW);if(left>0)return toast(`少し間をあけましょう（あと${left}週）`);
+  if(!useAP())return;
+  e.heartW=S.week;S.stat.heart++;
+  const nm=e.name.split(' ')[1]||e.name,crit=Math.random()<.2;
+  const gain=(crit?24:14)*R(.9,1.15)*(1+S.pres.cha*.01+perk('charm')*.08)*tMul(e,'aff');
+  scene({who:e,title:'💗 ふたりの時間',html:esc(pick(HEART_SC).replace(/\{n\}/g,nm)+'\n'+(e.lover?LOVE_TALK[e.type]:TALK[e.type][1])+`\n\n（好感度 +${gain.toFixed(1)}${crit?'　ドキドキ度MAX！':''}）`)});
+  addAff(e,gain);e.mot=Math.min(100,e.mot+15);
+  checkAch();save();render();
+}
+function outsiderRoll(){
+  if(S.fame<30||Math.random()>=Math.min(.2,.03+S.fame/6000))return;
+  const o=pick(OUTSIDERS);const e=genEmp({rar:wpick([0,55,35,10]),g:'F'});e.out=o.job;
+  const full=S.staff.length>=capacity();
+  scene({who:e,title:'社外からの告白',html:esc(`${o.job}の ${e.name}（${e.age}歳）が、社長に会いにやって来た。\n${o.line}`)+(full?'\n<span class="mute">（オフィスが満員です。移転や退職で空きがあれば受け入れられます）</span>':''),btns:[
+    {l:full?'今回は見送る':'受け入れて迎える ♥',p:1,f:()=>{
+      if(full)return;
+      e.aff=80;e.seen=5;e.lover=true;e.mot=85;e.last=S.week;e.pj=S.proj[0]?S.proj[0].id:null;e.bd=RI(0,47);
+      S.staff.push(e);S.stat.hired++;S.stat.outs++;S.stat.maxStaff=Math.max(S.stat.maxStaff,S.staff.length);S.typeDex[e.type]=true;S.fame+=3;S.stat.lovers=Math.max(S.stat.lovers,lovers().length);
+      logm(`${o.job}の ${e.name} が仲間に加わった ♥`,'hi');checkAch();save();render()}},
+    ...(full?[]:[{l:'丁重にお断りする',f:()=>{S.fame+=1}}])]});
+}
+function birthdays(){
+  const bw=S.week%48;const l=S.staff.filter(e=>e.bd===bw);if(!l.length)return;
+  const fl=l.filter(e=>e.g==='F'&&e.aff>=28);
+  const names=l.slice(0,4).map(e=>e.name.split(' ')[1]||e.name).join('、')+(l.length>4?` ほか${l.length-4}人`:'');
+  let gift='';if(fl.length){S.stat.recv+=fl.length;gift=`\n${fl.length}人の社員から、感謝の手作りプレゼントが届いた。`}
+  scene({title:'🎂 誕生日',html:esc(`今週は ${names} の誕生日。${gift}\nお祝いしますか？`),btns:[
+    {l:`盛大に祝う（${yen(30000*l.length)}）`,p:1,f:()=>celebrate(l,30000,7,12)},
+    {l:`ささやかに（${yen(8000*l.length)}）`,f:()=>celebrate(l,8000,3,5)},
+    {l:'何もしない',f:()=>{for(const e of l)if(e.g==='F')e.aff=Math.max(0,e.aff-1)}}]});
+}
+function celebrate(l,per,aff,mot){
+  const c=per*l.length;if(S.money<c)return toast('資金が足りません');S.money-=c;
+  for(const e of l){if(e.g==='F')bulkAff(e,aff);else e.aff=Math.min(100,e.aff+2);e.mot=Math.min(100,e.mot+mot)}
+  S.stat.bday+=l.length;logm(`誕生日を祝った（${l.length}人）`,'gd');checkAch();save();render();
+}
+function clubStep(){
+  const w=S.staff.filter(e=>e.g==='F'&&e.aff>=45).length;
+  if(w<3&&!S.club.vol)return;
+  S.club.vol++;const add=RI(1,3)+Math.floor(w/4)+Math.floor(S.fame/400);S.club.n+=add;
+  const f=Math.floor(S.club.n/12)+1;S.fame+=f;
+  logm(`社内報 vol.${S.club.vol}「社長特集」が好評。ファンクラブ会員 ${S.club.n}人（知名度+${f}）`,'gd');
+}
+function doTrip(id){
+  const t=TRIPS.find(x=>x.id===id),n=S.staff.length;
+  if(n<3)return toast('社員が3人以上必要です');
+  if(S.week-S.trip<8)return toast(`社員旅行はあと${8-(S.week-S.trip)}週あけましょう`);
+  const c=t.per*n;if(S.ap<2)return toast('行動力が2必要です');if(!spend(c))return;
+  S.ap-=2;S.trip=S.week;S.stat.trips++;
+  for(const e of S.staff){e.mot=Math.min(100,e.mot+t.mot);e.fat=0;if(e.g==='F')bulkAff(e,t.aff);else e.aff=Math.min(100,e.aff+3)}
+  logm(`社員旅行（${t.n}）に行った`,'gd');
+  const fs=S.staff.filter(e=>e.g==='F').sort(()=>Math.random()-.5).slice(0,3);
+  if(fs.length>=2)scene({title:'社員旅行：'+t.n,html:esc(t.txt+'\n\n夜、班分けのくじ引きで同じ班になる相手が決まる。…あなたが選べるとしたら？'),btns:fs.map(e=>({l:e.name.split(' ')[1]||e.name,f:()=>{bulkAff(e,12);e.mot=100;scene({who:e,title:'旅先の夜',html:esc(pick(TRIP_PAIR).replace('{a}',e.name.split(' ')[1]||e.name)+'\n（好感度 +12）')});save();render()}}))});
+  else scene({title:'社員旅行：'+t.n,html:esc(t.txt)});
+  checkAch();save();render();
+}
+function buyRoom(id){
+  const it=ROOM_ITEMS.find(x=>x.id===id);if(!it||S.room.items[id])return;if(S.office<it.min)return toast('オフィス拡張で解放');
+  if(!spend(it.cost))return;S.room.items[id]=1;toast(it.n+'を導入した');checkAch();save();render();
+}
+const curTitle=()=>{const earned=TITLES.filter(t=>t.c());const sel=S.titleSel&&earned.find(t=>t.id===S.titleSel);if(sel)return sel.n;const pub=earned.filter(t=>!t.r);return pub[pub.length-1].n};
+const bdTxt=e=>{const m=Math.floor(e.bd/4);return`${(m+3)%12+1}月第${e.bd%4+1}週`};
+
+/* ====== portraits (user images) ====== */
+const IMG={avail:[],src:{},mavail:[],msrc:{}};
+const rebuildImg=()=>{IMG.avail=Object.keys(IMG.src).map(Number).sort((a,b)=>a-b);IMG.mavail=Object.keys(IMG.msrc).map(Number).sort((a,b)=>a-b)};
+const tryLoad=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(true);i.onerror=()=>r(false);i.src=u});
+async function loadImages(){
+  const pad=n=>String(n).padStart(3,'0');
+  const probe=pre=>Promise.all(Array.from({length:100},(_,i)=>tryLoad(pre+pad(i+1)+'.jpg').then(ok=>ok?i+1:0)));
+  try{
+    const [f,m]=await Promise.all([probe(''),probe('man')]);
+    for(const n of f)if(n)IMG.src[n]=pad(n)+'.jpg';
+    for(const n of m)if(n)IMG.msrc[n]='man'+pad(n)+'.jpg';
+  }catch(e){}
+  rebuildImg();render();
+}
+const poolOf=e=>e.g==='F'?{av:IMG.avail,src:IMG.src}:{av:IMG.mavail,src:IMG.msrc};
+function ensureImg(e){
+  const P=poolOf(e);if(!P.av.length)return null;
+  if(e.img!=null&&P.src[e.img])return P.src[e.img];
+  const used=new Set();for(const x of S.staff.concat(S.cand))if(x.g===e.g&&x.img!=null&&P.src[x.img])used.add(x.img);
+  const free=P.av.filter(n=>!used.has(n));const pool=free.length?free:P.av;
+  e.img=pool[Math.floor(Math.random()*pool.length)];return P.src[e.img];
+}
+
+/* ====== avatar ====== */
+const HAIR=['#2b2233','#5a3a2e','#8a5a3c','#d9a05b','#e8c9a0','#c94f6d','#7a5cc9','#3d7dca','#4aa88a','#e8e8f0','#ff8fb0'];
+const EYEC=['#5b3a29','#2f6fb5','#3f9a6b','#8a4fc9','#c9493f','#2a2a3a','#c98f2f'];
+const SKIN=['#ffe3d0','#fbd5bd','#f3c4a6'];
+const OUTF=['#ff6b9a','#7cc4ff','#6fe3c1','#ffc45e','#b79bff','#f3eefb','#4a5270','#c94f6d'];
+function avatar(e,size,o){
+  o=o||{};
+  if(!o.svg&&e.id!=null&&S){const n=ensureImg(e);if(n)return `<img class="av" src="${n}" width="${size}" height="${size}" alt="${esc(e.name||'')}" style="object-fit:cover;object-position:50% 12%">`}const r=seeded(e.seed);const pk=a=>a[Math.floor(r()*a.length)];
+  const hair=pk(HAIR),eye=pk(EYEC),skin=pk(SKIN),outf=pk(OUTF);
+  const style=e.g==='F'?Math.floor(r()*6):6+Math.floor(r()*2);
+  const glasses=r()<.28,acc=Math.floor(r()*3);
+  const mood=e.mot>=65?2:e.mot<30?0:1;const blush=e.aff>=35||o.blush;
+  let back='',front='';
+  if(style===0)back=`<path d="M22 54 Q18 12 50 10 Q82 12 78 54 L78 64 L22 64Z" fill="${hair}"/>`;
+  if(style===1)back=`<path d="M20 50 Q16 8 50 8 Q84 8 80 50 L87 98 L13 98Z" fill="${hair}"/>`;
+  if(style===2)back=`<path d="M22 54 Q18 12 50 10 Q82 12 78 54 L78 62 L22 62Z" fill="${hair}"/><ellipse cx="14" cy="64" rx="9" ry="22" fill="${hair}"/><ellipse cx="86" cy="64" rx="9" ry="22" fill="${hair}"/>`;
+  if(style===3)back=`<path d="M22 54 Q18 12 50 10 Q82 12 78 54 L78 62 L22 62Z" fill="${hair}"/><ellipse cx="86" cy="60" rx="8" ry="21" transform="rotate(-12 86 60)" fill="${hair}"/>`;
+  if(style===4)back=`<path d="M20 50 Q16 8 50 8 Q84 8 80 50 L83 82 Q70 88 66 72 L34 72 Q30 88 17 82Z" fill="${hair}"/>`;
+  if(style===5)back=`<path d="M22 54 Q18 12 50 10 Q82 12 78 54 L78 62 L22 62Z" fill="${hair}"/><circle cx="50" cy="8" r="9" fill="${hair}"/>`;
+  if(style===7)back=`<path d="M22 50 Q20 10 50 10 Q80 10 78 50 L78 58 L22 58Z" fill="${hair}"/>`;
+  front=e.g==='F'
+    ?`<path d="M24 50 C20 18 40 8 50 8 C60 8 80 18 76 50 C72 38 66 32 56 30 C52 38 42 38 38 32 C30 36 26 42 24 50Z" fill="${hair}"/>`
+    :`<path d="M24 48 C22 16 40 8 50 8 C60 8 78 16 76 48 L70 36 L62 40 L54 30 L46 40 L38 32 L30 38Z" fill="${hair}"/>`;
+  const ey=mood===0?54:53;
+  const mouth=mood===2?`<path d="M43 64 Q50 71 57 64Z" fill="#c9566e"/>`:mood===1?`<path d="M44 65 Q50 68 56 65" stroke="#a8566a" stroke-width="1.8" fill="none" stroke-linecap="round"/>`:`<path d="M44 67 Q50 62 56 67" stroke="#a8566a" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  let ac='';
+  if(e.g==='F'){
+    if(acc===0)ac=`<path d="M60 14 L74 8 L72 22Z M60 14 L48 8 L50 22Z" fill="${outf}"/><circle cx="60" cy="14" r="3.4" fill="#fff" opacity=".85"/>`;
+    if(acc===1)ac=`<path d="M25 30 Q50 6 75 30" stroke="${outf}" stroke-width="3.5" fill="none"/>`;
+  }
+  const gl=glasses?`<g stroke="#2a2233" stroke-width="1.6" fill="rgba(180,220,255,.15)"><circle cx="40" cy="${ey}" r="8.5"/><circle cx="60" cy="${ey}" r="8.5"/><path d="M48.5 ${ey} L51.5 ${ey}"/></g>`:'';
+  return `<svg class="av" width="${size}" height="${size}" viewBox="0 0 100 100" role="img" aria-label="${esc(e.name||'')}">
+<rect width="100" height="100" fill="#2f2840"/>${back}
+<path d="M16 100 Q20 76 50 74 Q80 76 84 100Z" fill="${outf}"/><path d="M42 75 L50 87 L58 75Z" fill="#fff" opacity=".92"/>
+<rect x="44" y="64" width="12" height="14" fill="${skin}"/>
+<ellipse cx="50" cy="50" rx="22" ry="25" fill="${skin}"/>
+${blush?`<ellipse cx="34" cy="62" rx="5" ry="3" fill="#ff7a96" opacity=".45"/><ellipse cx="66" cy="62" rx="5" ry="3" fill="#ff7a96" opacity=".45"/>`:''}
+<ellipse cx="40" cy="${ey}" rx="4.2" ry="5.4" fill="${eye}"/><ellipse cx="60" cy="${ey}" rx="4.2" ry="5.4" fill="${eye}"/>
+<ellipse cx="40" cy="${ey}" rx="2" ry="3" fill="#1a1520"/><ellipse cx="60" cy="${ey}" rx="2" ry="3" fill="#1a1520"/>
+<circle cx="41.4" cy="${ey-2}" r="1.5" fill="#fff"/><circle cx="61.4" cy="${ey-2}" r="1.5" fill="#fff"/>
+<path d="M34 ${ey-9} Q40 ${ey-12} 46 ${ey-9}M54 ${ey-9} Q60 ${ey-12} 66 ${ey-9}" stroke="${hair}" stroke-width="1.6" fill="none"/>
+${mouth}${front}${gl}${ac}</svg>`;
+}
+
+/* ====== small view helpers ====== */
+const rarTag=e=>`<span class="tag ${['','r','sr','ssr'][e.rar]}">${RAR[e.rar]}</span>`;
+const hearts=e=>{const s=stageOf(e);let h='';for(let i=1;i<=5;i++)h+=i<=s?'♥':'<span class="off">♥</span>';return`<span class="hearts" title="${STAGE_N[s]}">${h}</span>`};
+const bar=(v,m,c)=>`<div class="bar"><i style="width:${clamp(v/m*100,0,100)}%;${c?'background:'+c:''}"></i></div>`;
+function stbars(e,full){
+  return`<div class="sbars">${[0,1,2,3,4].map(k=>`<div><div class="bar"><i style="--c:${STC[k]};width:${clamp(effStat(e,k)/150*100,3,100)}%;background:${STC[k]}"></i></div>${full?ST[k].slice(0,3):STS[k]} ${Math.round(effStat(e,k))}</div>`).join('')}</div>`;
+}
+const projName=id=>{const p=S.proj.find(x=>x.id===id);return p?p.title:null};
+
+/* ====== modal / scene / toast ====== */
+let SQ=[],sceneOpen=false,curScene=null,toastT=null;
+function toast(t){const el=document.getElementById('toast');el.innerHTML=`<div class="toast">${esc(t)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>{el.innerHTML=''},2200)}
+function scene(o){SQ.push(o);if(!sceneOpen)nextScene()}
+function nextScene(){
+  const o=SQ.shift();const el=document.getElementById('scene');
+  if(!o){sceneOpen=false;curScene=null;el.innerHTML='';render();return}
+  sceneOpen=true;curScene=o;
+  const btns=o.btns||[{l:'OK',p:1,f:()=>{}}];
+  el.innerHTML=`<div class="back scene"><div class="sheet" role="dialog" aria-modal="true">
+   <div class="row" style="margin-bottom:6px">${o.who?avatar(o.who,64):''}<h2 style="margin:0" class="grow">${esc(o.title||'')}</h2></div>
+   <div class="say fresh">${o.html||''}</div>
+   <div class="row" style="justify-content:flex-end;margin-top:10px">${btns.map((b,i)=>`<button class="btn ${b.p?'primary':''}" data-a="sceneBtn" data-i="${i}">${esc(b.l)}</button>`).join('')}</div></div></div>`;
+  const f=el.querySelector('.btn.primary')||el.querySelector('.btn');if(f)f.focus();
+}
+function closeModal(){G.empId=null;G.modalFn=null;document.getElementById('modal').innerHTML=''}
+function showModal(fn){G.modalFn=fn;renderModal()}
+function renderModal(){
+  const el=document.getElementById('modal');
+  if(G.empId&&!empById(G.empId))G.empId=null;
+  let inner=null;
+  if(G.empId)inner=empModal(empById(G.empId));else if(G.modalFn)inner=G.modalFn();
+  if(inner===null){el.innerHTML='';return}
+  const prev=el.querySelector('.sheet');const sc=prev?prev.scrollTop:0;
+  el.innerHTML=`<div class="back" data-a="bgClose"><div class="sheet" role="dialog" aria-modal="true">${inner}</div></div>`;
+  const n=el.querySelector('.sheet');if(n)n.scrollTop=sc;
+}
+
+/* ====== employee modal ====== */
+function empModal(e){
+  const nm=e.name.split(' ')[1]||e.name,st=stageOf(e);
+  const named=e.named?NAMED.find(n=>n.id===e.named):null;
+  const star='★'.repeat(e.star)+'☆'.repeat(5-e.star);
+  const gifts=GIFTS.map((g,i)=>{const k=e.likes[i];const m=k==='love'?'😍':k==='ok'?'🙂':k==='bad'?'😕':'？';const c=Math.round(g.p*(1-.08*fac('gift')));
+    return`<button class="btn" data-a="act" data-k="gift" data-id="${e.id}" data-x="${i}">${esc(g.n)} ${m}<small>${yen(c)}</small></button>`}).join('');
+  const lockDate=e.g!=='F'||st<3||S.week-e.dateW<4;
+  const starCost=2000000*Math.pow(3,e.star);
+  const projs=S.proj.map(p=>`<button class="pick ${e.pj===p.id?'on':''}" data-a="act" data-k="assign" data-id="${e.id}" data-x="${p.id}">${esc(p.title)}</button>`).join('');
+  return `
+  <div class="row" style="align-items:flex-start">${avatar(e,96,{})}
+    <div class="grow"><h2 style="margin:0 0 4px">${esc(e.name)}</h2>
+    <div class="row" style="gap:6px">${rarTag(e)}<span class="tag">${e.g==='F'?'♀':'♂'} ${e.age}歳</span><span class="tag">${e.g==='F'?TYPES[e.type].n:'—'}</span><span class="tag">${JOBS[jobOf(e)]}</span><span class="tag">🎂${bdTxt(e)}</span>${e.out?`<span class="tag">${esc(e.out)}</span>`:''}${e.lover?'<span class="tag love">♥ 恋人</span>':''}${e.preg>0?`<span class="tag love">妊娠中 あと${e.preg}週</span>`:''}${e.mat>0?'<span class="tag">産休中</span>':''}${e.kids?`<span class="tag">子供 ${e.kids}人</span>`:''}</div>
+    <div class="sm mute" style="margin-top:4px">Lv ${e.lv}/${lvCap(e)}　<span class="stars">${star}</span></div>
+    ${bar(e.exp,needExp(e),'var(--sky)')}</div>
+    <button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div>
+  ${named?`<div class="say sm">${esc(named.bio)}</div>`:''}
+  <div style="margin:10px 0">${stbars(e,true)}</div>
+  <div class="grid2" style="gap:8px;margin-bottom:8px">
+    <div class="card"><div class="sm mute">やる気 ${Math.round(e.mot)}</div>${bar(e.mot,100,'var(--mint)')}<div class="sm mute" style="margin-top:4px">疲労 ${Math.round(e.fat)}</div>${bar(e.fat,100,'var(--red)')}</div>
+    <div class="card"><div class="sm"><span class="mute">好感度</span> ${e.g==='F'?hearts(e)+' '+STAGE_N[st]:'—'}</div>${e.g==='F'?bar(e.aff,100):''}
+      <div class="sm mute" style="margin-top:4px">月給 ${yen(salOf(e))}${e.raise?`（昇給${e.raise}回）`:''}${e.lover?`／絆 Lv ${Math.floor(e.bond/3)}`:''}</div></div></div>
+  ${e.tr.length?`<div class="sm" style="margin-bottom:8px">${e.tr.map(t=>`<span class="tag">${TRAITS[t].n}</span> <span class="mute">${TRAITS[t].d}</span>`).join('<br>')}</div>`:''}
+  ${G.react?`<div class="say fresh">${esc(G.react)}</div>`:`<div class="say mute sm">${esc(named?named.intro:'話しかけてみよう。')}</div>`}
+  <h3>交流<span class="mute sm">（行動力 ${S.ap}）</span></h3>
+  <div class="acts" style="margin-bottom:10px">
+   <button class="btn" data-a="act" data-k="talk" data-id="${e.id}">話す<small>行動力1・無料</small></button>
+   <button class="btn" data-a="act" data-k="lunch" data-id="${e.id}">ランチ<small>行動力1・5,000円</small></button>
+   <button class="btn" data-a="act" data-k="counsel" data-id="${e.id}">面談<small>疲労回復・行動力1</small></button>
+   ${e.g==='F'&&e.aff>=STAGES[3]?`<button class="btn" data-a="heart" data-id="${e.id}">💗 ふたりの時間<small>好感度が急上昇・行動力1</small></button>`:''}
+   ${e.g==='F'?`<button class="btn" data-a="act" data-k="date" data-id="${e.id}" ${lockDate?'style="opacity:.55"':''}>おでかけ<small>${st<3?'好感度「信頼」で解放':S.week-e.dateW<4?'あと'+(4-(S.week-e.dateW))+'週':'行動力1・4万円'}</small></button>`:''}
+ ${e.g==='F'&&(canChild(e)||e.preg>0||e.mat>0||e.kids)?`<button class="btn" data-a="act" data-k="child" data-id="${e.id}" ${canChild(e)?'':'style="opacity:.55"'}>子作り<small>${e.preg>0?'妊娠中':e.mat>0?'産休中':e.aff<STAGES[4]?'好感度「親愛」から':'行動力1'}</small></button>`:''}
+  </div>
+  ${e.g==='F'?`<h3>プレゼント<span class="mute sm">（好みは贈ると判明）</span></h3><div class="acts" style="margin-bottom:10px">${gifts}</div>`:''}
+  <h3>育成</h3>
+  <div class="acts" style="margin-bottom:10px">${[0,1,2,3,4].map(k=>`<button class="btn" data-a="act" data-k="train" data-id="${e.id}" data-x="${k}">${ST[k]}特訓<small>${yen(30000+e.lv*2500)}・行動力1</small></button>`).join('')}
+   <button class="btn" data-a="act" data-k="raise" data-id="${e.id}">昇給 +10%<small>${e.raise>=5?'上限':'やる気・好感度UP'}</small></button>
+   <button class="btn ${e.leave?'primary':''}" data-a="act" data-k="rest" data-id="${e.id}">${e.leave?'休暇中（取消）':'今週休暇'}<small>疲労を大きく回復</small></button>
+   <button class="btn warn" data-a="act" data-k="star" data-id="${e.id}" ${e.star>=5?'disabled':''}>限界突破<small>${e.star>=5?'MAX':`Lv${lvCap(e)}で ${yen(starCost)}`}</small></button></div>
+  <h3>配属</h3><div class="picks" style="margin-bottom:12px">${projs||'<span class="mute sm">開発中のプロジェクトがありません</span>'}${e.pj?`<button class="pick" data-a="act" data-k="assign" data-id="${e.id}" data-x="">配属解除</button>`:''}</div>
+  <div class="row sp"><span class="row" style="gap:8px"><button class="btn small" data-a="closeModal">閉じる</button> ${poolOf(e).av.length?`<button class="btn small" data-a="pickImg" data-id="${e.id}">顔画像を変更</button>`:''}</span>
+   ${G.fireAsk===e.id?`<button class="btn small warn" data-a="fire" data-id="${e.id}">本当に退社させる</button>`:`<button class="btn small" data-a="fireAsk" data-id="${e.id}">退社させる</button>`}</div>`;
+}
+
+/* ====== tabs ====== */
+function recs(){
+  const out=[];
+  const idle=S.staff.filter(e=>!e.pj&&!e.leave).length;
+  if(!S.staff.length)out.push('採用タブで社員を雇いましょう');
+  if(S.proj.length<slotsMax()&&S.staff.length)out.push('開発スロットが空いています。新作や受託を始めましょう');
+  if(idle&&S.proj.length)out.push(`待機中の社員が${idle}人います`);
+  if(S.ap>0)out.push(`行動力が${S.ap}残っています（交流・特訓・宣伝など）`);
+  if(S.staff.some(e=>e.inv))out.push(`お誘いが${S.staff.filter(e=>e.inv).length}件届いています`);
+  if(S.staff.length<capacity()&&S.money>3000000)out.push('オフィスに空きがあります。採用のチャンス');
+  if(canReborn())out.push('再起業（転生）が可能です。記録タブを確認');
+  return out;
+}
+function invCard(){
+  const inv=S.staff.filter(e=>e.inv);if(!inv.length)return'';
+  return`<div class="card hl"><div class="row sp"><h3 style="margin:0">お誘い ${inv.length}件</h3><button class="btn small primary" data-a="acceptAll">すべて受ける</button></div>
+  <div class="sm mute" style="margin:2px 0 8px">好感度が高い社員からのお誘いです。行動力は使いません。</div>
+  <div class="stack" style="gap:8px">${inv.slice(0,8).map(e=>`<div class="row" style="flex-wrap:nowrap;gap:8px"><button data-a="empOpen" data-id="${e.id}" style="background:none;border:0;padding:0;cursor:pointer">${avatar(e,44)}</button>
+   <div class="grow"><b class="sm">${esc(e.name)}</b> <span class="tag love">${INV_N[e.inv]}</span><div class="sm mute">${esc(INV_LINE[e.inv])}</div></div>
+   <button class="btn small primary" data-a="acceptInv" data-id="${e.id}">受ける</button><button class="btn small" data-a="declineInv" data-id="${e.id}">断る</button></div>`).join('')}
+  ${inv.length>8?`<div class="sm mute">…ほか${inv.length-8}件（「すべて受ける」でまとめて応えられます）</div>`:''}</div></div>`;
+}
+function greetCard(){
+  const g=(S.greet||[]).filter(x=>empById(x.id));if(!g.length)return'';
+  return`<div class="card"><h3>朝の挨拶${S.greetN>g.length?`<span class="mute sm">（ほか${S.greetN-g.length}人）</span>`:''}</h3><div class="stack" style="gap:8px">${g.map(x=>{const e=empById(x.id);return`<div class="row" style="flex-wrap:nowrap;gap:8px;align-items:flex-start">${avatar(e,44)}<div class="grow sm"><b>${esc(e.name)}</b><div class="mute">${esc(x.text)}</div></div></div>`}).join('')}</div></div>`;
+}
+function tabHome(){
+  const t=S.tutorial?`<div class="card hl"><h3>遊び方</h3><div class="sm" style="display:grid;gap:4px">
+  <div>① 毎週、<b>行動力</b>を使って社員と交流・育成・宣伝をします。</div>
+  <div>② <b>採用</b>で社員を集め、<b>開発</b>でゲームを作って売り、会社を大きくします。</div>
+  <div>③ 社員との交流で<b>好感度</b>が上がると、成果や社内の雰囲気が良くなり、いろいろなイベントも起こります。</div>
+  <div>④ 資金・知名度が育ったら<b>再起業</b>で永続強化。やり込み要素は<b>記録</b>タブに。社員は誰でも自由に採用・退職できます。</div>
+  </div><div style="margin-top:8px"><button class="btn small" data-a="tutOff">わかった</button></div></div>`:'';
+  const pj=S.proj.map(projCard).join('')||`<div class="card mute sm">開発中のプロジェクトはありません。<a href="#" data-a="tab" data-t="dev" class="rose">開発タブ</a>から始めよう。</div>`;
+  const r=recs();
+  return`<div class="stack">${t}${greetCard()}${invCard()}
+  <div class="card"><h3>今週のひとこと</h3><div class="sm" style="display:grid;gap:3px">${r.length?r.map(x=>`<div>・${esc(x)}</div>`).join(''):'<div class="mute">やることは一通り済んでいます。次の週へ進みましょう。</div>'}</div></div>
+  <h2>開発中</h2>${pj}
+  <div class="card"><div class="row sp"><h3 style="margin:0">市場の流行</h3><span class="chip">${GENRES[S.trend.g].n}×${THEMES[S.trend.t]}</span></div>
+   <div class="sm mute">流行に合わせると品質・売上にボーナスがつきます。（あと約${Math.max(0,S.trend.until-S.week)}週）</div></div>
+  <h2>社内ログ</h2><div class="log">${S.log.slice(0,14).map(l=>`<div class="${l.c}">${esc(calStr(l.w))}　${esc(l.t)}</div>`).join('')||'<span class="mute">まだ何も起きていない。</span>'}</div></div>`;
+}
+function eta(p){
+  const o=projOut(p);let w=0;
+  for(let k=0;k<5;k++){const rem=p.tgt[k]-p.pts[k];if(rem>0){if(o[k]<=0)return null;w=Math.max(w,rem/o[k])}}
+  return Math.ceil(w);
+}
+function projCard(p){
+  const prog=projProg(p),e=eta(p);const team=S.staff.filter(x=>x.pj===p.id);
+  const head=p.kind==='game'?`${GENRES[p.g].n}×${THEMES[p.t]}　${PLATS[p.pf].n}／${SCALES[p.sc].n}　相性 ${S.known[p.g+'-'+p.t]?compatMark(compat(p.g,p.t)):'？'}`:`受託案件　報酬 ${yen(p.reward)}　納期 ${calStr(p.deadline)}`;
+  const idle=S.staff.filter(x=>!x.pj);
+  return `<div class="card"><div class="row sp"><h3 style="margin:0">${esc(p.title)}</h3><span class="chip num">${Math.floor(prog*100)}%</span></div>
+   <div class="sm mute">${head}${p.kind==='game'?`　期待度 ${p.hype}/10`:''}</div>
+   <div style="margin:8px 0">${bar(prog,1,'var(--rose)').replace('class="bar"','class="bar b"')}</div>
+   <div class="sbars" style="margin-bottom:6px">${[0,1,2,3,4].map(k=>`<div><div class="bar"><i style="background:${STC[k]};width:${clamp(p.pts[k]/p.tgt[k]*100,2,100)}%"></i></div>${STS[k]} ${Math.min(999,Math.floor(p.pts[k]/p.tgt[k]*100))}%</div>`).join('')}</div>
+   <div class="sm mute">${team.length}人が担当${e===null?'　<span class="red">成果ゼロの分野あり</span>':`　完成まで約${e}週`}</div>
+   <div class="picks" style="margin:8px 0">${S.staff.map(x=>`<button class="pick ${x.pj===p.id?'on':x.pj?'dim':''}" data-a="toggleAssign" data-id="${x.id}" data-p="${p.id}" title="${esc(x.name)}">${esc((x.name.split(' ')[1]||x.name))}</button>`).join('')}</div>
+   <div class="row"><button class="btn small" data-a="assignAll" data-id="${p.id}">待機者を全員投入${idle.length?'':''}</button><button class="btn small" data-a="unassignAll" data-id="${p.id}">全員解除</button>
+   ${p.kind==='game'?`<button class="btn small" data-a="hypeP" data-id="${p.id}">宣伝 <span class="mute">${yen(300000*(1+S.office))}</span></button><button class="btn small" data-a="relP" data-id="${p.id}">妥協リリース</button>`:''}
+   <button class="btn small" data-a="cancelP" data-id="${p.id}">中止</button></div></div>`;
+}
+function tabStaff(){
+  let list=S.staff.slice();
+  if(G.filter==='love')list=list.filter(e=>e.lover);else if(G.filter==='F')list=list.filter(e=>e.g==='F');else if(G.filter==='idle')list=list.filter(e=>!e.pj);
+  const so={aff:(a,b)=>b.aff-a.aff,lv:(a,b)=>b.lv-a.lv,rar:(a,b)=>b.rar-a.rar||b.lv-a.lv,sal:(a,b)=>salOf(b)-salOf(a),mot:(a,b)=>a.mot-b.mot};
+  list.sort(so[G.sort]);
+  const cnt=S.staff.length,L=lovers().length;
+  return`<div class="row sp"><h2 style="margin:0">社員 ${cnt}/${capacity()}</h2><span class="chip">${L?`♥ ${L}人／`:''}ハーモニー ${harmony()}</span></div>
+  <div class="row" style="margin:8px 0">
+   <div class="picks">${[['all','全員'],['F','女性'],['love','恋人'],['idle','待機']].map(([k,n])=>`<button class="pick ${G.filter===k?'on':''}" data-a="filter" data-v="${k}">${n}</button>`).join('')}</div>
+   <select id="sortSel" data-s="sort" style="width:auto" aria-label="並び替え">${[['aff','好感度順'],['lv','Lv順'],['rar','レア順'],['sal','給与順'],['mot','やる気が低い順']].map(([k,n])=>`<option value="${k}" ${G.sort===k?'selected':''}>${n}</option>`).join('')}</select></div>
+  <div class="grid2">${list.slice(0,G.limit).map(empCard).join('')||'<div class="card mute">該当する社員がいません</div>'}</div>
+  ${list.length>G.limit?`<div style="text-align:center;margin-top:12px"><button class="btn" data-a="more">もっと見る（残り${list.length-G.limit}人）</button></div>`:''}`;
+}
+function empCard(e){
+  const where=e.leave?'休暇中':e.pj?(projName(e.pj)||'待機'):'待機';
+  return`<div class="card ${e.lover?'hl':''}"><div class="row" style="flex-wrap:nowrap;align-items:flex-start">
+   <button data-a="empOpen" data-id="${e.id}" style="background:none;border:0;padding:0;cursor:pointer" aria-label="${esc(e.name)}の詳細">${avatar(e,56)}</button>
+   <div class="grow"><div class="row" style="gap:5px"><b>${esc(e.name)}</b>${rarTag(e)}${e.lover?'<span class="tag love">♥</span>':''}${e.preg>0?'<span class="tag love">妊娠</span>':''}${e.kids?`<span class="tag">子${e.kids}</span>`:''}${e.inv?'<span class="tag love">お誘い</span>':''}</div>
+    <div class="sm mute">${e.g==='F'?TYPES[e.type].n:'男性'}・${JOBS[jobOf(e)]}・Lv${e.lv}${e.star?' ★'+e.star:''}</div>
+    <div class="sm">${e.g==='F'?hearts(e):''} <span class="mute tiny">${esc(where)}</span></div></div></div>
+   <div style="margin:8px 0 6px">${stbars(e)}</div>
+   <div class="row sp"><span class="tiny mute">やる気 ${Math.round(e.mot)}／疲労 ${Math.round(e.fat)}</span>
+   <span class="row" style="gap:6px"><button class="btn small" data-a="act" data-k="talk" data-id="${e.id}">話す</button>${e.g==='F'&&e.aff>=STAGES[3]?`<button class="btn small" data-a="heart" data-id="${e.id}" title="ふたりの時間" aria-label="ふたりの時間">💗</button>`:''}<button class="btn small" data-a="empOpen" data-id="${e.id}">詳細</button></span></div></div>`;
+}
+function tabDev(){
+  const f=G.form,free=S.proj.length<slotsMax();
+  const cp=compat(f.g,f.t);
+  const sel=(id,arr,key,fn)=>`<label class="f">${arr.label}<select id="${id}" data-s="form" data-key="${key}">${arr.items.map((x,i)=>`<option value="${i}" ${f[key]==i?'selected':''}>${fn(x,i)}</option>`).join('')}</select></label>`;
+  const form=`<div class="card"><h3>新作を企画する</h3><div class="grid2" style="gap:8px;grid-template-columns:1fr 1fr">
+   ${sel('fg',{label:'ジャンル',items:GENRES},'g',(x,i)=>`${x.n}（Lv${genreLv(i)}）`)}
+   ${sel('ft',{label:'テーマ',items:THEMES},'t',(x,i)=>`${x}（Lv${themeLv(i)}）`)}
+   ${sel('fp',{label:'プラットフォーム',items:PLATS},'pf',(x,i)=>`${x.n}${x.unlock>S.office?'（要拡張）':''}`)}
+   ${sel('fs',{label:'規模',items:SCALES},'sc',(x,i)=>`${x.n}${x.unlock>S.office?'（要拡張）':''}`)}
+  </div>
+  <label class="f" style="margin-top:8px">タイトル（空欄でおまかせ）<input type="text" id="ftitle" data-s="title" value="${esc(f.title)}" maxlength="24" placeholder="例：星降るクロニクル"></label>
+  <div class="row sp" style="margin-top:8px"><span class="sm">相性 <b class="${S.known[f.g+'-'+f.t]?'rose':'mute'}">${S.known[f.g+'-'+f.t]?compatMark(cp):'？（未調査）'}</b>　必要成果 約${num(SCALES[f.sc].T*PLATS[f.pf].t)}pt　売値 ${yen(PLATS[f.pf].price)}</span>
+  <button class="btn primary" data-a="startProj" ${free&&S.staff.length?'':'disabled'}>${free?'開発スタート':'スロット満杯'}</button></div></div>`;
+  const contracts=S.contracts.map(c=>`<div class="card"><div class="row sp"><b>${esc(c.title)}</b><span class="amber">${yen(c.reward)}</span></div>
+   <div class="sm mute">必要成果 約${num(c.tgt.reduce((a,b)=>a+b,0))}pt／納期 ${c.dl}週間</div>
+   <div class="row sp" style="margin-top:6px"><span class="sbars" style="width:60%">${c.tgt.map((v,k)=>`<div><div class="bar"><i style="background:${STC[k]};width:${v/Math.max(...c.tgt)*100}%"></i></div>${STS[k]}</div>`).join('')}</span>
+   <button class="btn small" data-a="takeContract" data-id="${c.id}" ${free&&S.staff.length?'':'disabled'}>受注</button></div></div>`).join('')||'<div class="card mute sm">次の月に新しい案件が来ます。</div>';
+  const hist=S.released.slice(0,10).map(g=>`<div class="row sp card" style="padding:8px 12px"><div class="grow"><b>${esc(g.title)}</b><div class="tiny mute">${GENRES[g.g].n}×${THEMES[g.t]}・${PLATS[g.pf].n}・${calStr(g.week)}</div></div>
+   <div style="text-align:right"><b class="rose">${g.score.toFixed(1)}</b><div class="tiny mute num">${num(g.sold)}本 / ${yen(g.rev)}${g.done?'':' (販売中)'}</div></div></div>`).join('')||'<div class="card mute sm">まだ発売したゲームはありません。</div>';
+  let mat='<table class="sm" style="border-collapse:collapse;min-width:420px"><tr><th></th>'+THEMES.map(t=>`<th class="tiny mute" style="padding:2px 4px">${t.slice(0,3)}</th>`).join('')+'</tr>';
+  for(let g=0;g<8;g++){mat+=`<tr><td class="tiny mute" style="padding:2px 6px;white-space:nowrap">${GENRES[g].n.slice(0,6)}</td>`;for(let t=0;t<8;t++){const k=S.known[g+'-'+t];const c=compat(g,t);mat+=`<td style="text-align:center;padding:2px 4px;color:${k?(c>=1.2?'var(--rose)':c>=1.02?'var(--mint)':'var(--mute)'):'var(--line)'}">${k?compatMark(c):'？'}</td>`}mat+='</tr>'}
+  mat+='</table>';
+  return`<h2>開発 <span class="sm mute">スロット ${S.proj.length}/${slotsMax()}</span></h2>
+  <div class="stack">${S.proj.map(projCard).join('')}${form}
+  <h3 style="margin-top:6px">受託案件</h3>${contracts}
+  <div class="card"><div class="row sp"><h3 style="margin:0">相性マップ</h3><button class="btn small" data-a="presAct" data-k="market">市場調査 <span class="mute">20万円</span></button></div><div class="sm mute" style="margin:4px 0 8px">発売するか市場調査で、ジャンル×テーマの相性が分かります。</div><div style="overflow-x:auto">${mat}</div></div>
+  <h3>発売履歴</h3>${hist}</div>`;
+}
+function candCard(c){
+  const fee=Math.round(salOf(c)*1.5);
+  const body=c.rev?`${stbars(c,true)}<div class="sm" style="margin-top:6px">${c.g==='F'?TYPES[c.type].n+'タイプ':'男性'}　${c.tr.map(t=>`<span class="tag">${TRAITS[t].n}</span>`).join(' ')||'<span class="mute">特性なし</span>'}　伸びしろ ${c.pot>=1.7?'S':c.pot>=1.4?'A':c.pot>=1.1?'B':'C'}</div>`
+   :`<div class="sm mute" style="margin-top:6px">能力・性格・特性は面接で判明します。<br>${c.named?'<span class="amber">特別な人材の気配がする…</span>':''}</div>`;
+  return`<div class="card ${c.rar>=3?'hl':''}"><div class="row" style="flex-wrap:nowrap;align-items:flex-start">${avatar(c,60)}<div class="grow"><div class="row" style="gap:5px"><b>${esc(c.name)}</b>${rarTag(c)}</div>
+   <div class="sm mute">${c.g==='F'?'♀':'♂'} ${c.age}歳　応募期限 あと${Math.max(0,c.exp-S.week)}週</div>
+   <div class="sm">月給 ${yen(salOf(c))}／契約金 ${yen(fee)}</div></div></div>${body}
+   <div class="row" style="margin-top:8px;justify-content:flex-end">${c.rev?'':`<button class="btn small" data-a="interview" data-id="${c.id}">面談する（行動力1）</button>`}<button class="btn small primary" data-a="hire" data-id="${c.id}">採用する</button></div></div>`;
+}
+function tabHire(){
+  const ads=ADS.map(a=>{const c=adCost(a);const cd=a.free?Math.max(0,4-(S.week-S.schoolAt)):0;
+    return`<button class="btn" data-a="recruit" data-id="${a.id}" style="text-align:left"><b>${a.n}</b><div class="sm mute">${a.d}</div><div class="sm ${a.conne?'mint':'amber'}">${a.conne?`コネ ${a.conne}`:a.free?(cd?`あと${cd}週`:'無料'):yen(c)}　応募${a.cnt}名</div></button>`}).join('');
+  return`<h2>採用 <span class="sm mute">${S.staff.length}/${capacity()}名</span></h2>
+  <div class="card"><div class="row sp"><div><h3 style="margin:0">女性歓迎で募集</h3><div class="sm mute">オンで応募者が女性ばかりになります（広告費 +50%）</div></div>
+   <button class="btn ${G.hireF?'primary':''}" data-a="hireF" aria-pressed="${G.hireF}">${G.hireF?'ON':'OFF'}</button></div></div>
+  <div class="grid2" style="margin:12px 0">${ads}</div>
+  <div class="sm mute" style="margin-bottom:8px">ヘッドハントは10回に1回、SSRが確定します（天井 ${S.pity}/10）。特別な社員は図鑑に載ります。</div>
+  <h3>応募者</h3><div class="grid2">${S.cand.map(candCard).join('')||'<div class="card mute sm">応募者はいません。上の求人から募集しましょう。</div>'}</div>`;
+}
+function tabCorp(){
+  const o=OFFICES[S.office],nx=OFFICES[S.office+1],p=S.pres;
+  const facs=FACS.map(f=>{const lv=fac(f.id),mx=lv>=FAC_MAX,lock=S.office<f.min;
+    return`<div class="card" style="padding:10px 12px"><div class="row sp"><div class="grow"><b>${f.n}</b> <span class="tag">Lv ${lv}/${FAC_MAX}</span><div class="sm mute">${f.d}</div></div>
+    <button class="btn small" data-a="buyFac" data-id="${f.id}" ${mx||lock?'disabled':''}>${mx?'MAX':lock?'要拡張':yen(facCost(f,lv))}</button></div></div>`}).join('');
+  const L=lovers();
+  return`<h2>会社</h2><div class="stack">
+  <div class="card"><div class="row sp"><div><h3 style="margin:0">${esc(o.n)}</h3><div class="sm mute">定員 ${o.cap}名／開発スロット ${slotsMax()}／家賃 ${yen(o.rent)}（月）</div></div>
+   ${nx?`<button class="btn primary" data-a="buyOffice">移転 ${yen(nx.cost)}</button>`:'<span class="tag ssr">最上級</span>'}</div>
+   ${nx?`<div class="sm mute" style="margin-top:6px">次：${nx.n}（定員${nx.cap}・スロット${SLOTS[S.office+1]}）</div>`:''}
+   <div class="sm" style="margin-top:6px">月間の固定費 ${yen(S.staff.reduce((a,e)=>a+salOf(e),0)+o.rent)}</div></div>
+  <div class="card"><h3>社長のスキル</h3><div class="kv" style="margin-bottom:8px">
+   <span>企画力 Lv${p.plan}</span><span>全開発に成果 +${(3+p.plan*1.1).toFixed(0)}pt／週・品質 +${(p.plan*.4).toFixed(1)}%</span>
+   <span>経営力 Lv${p.biz}</span><span>給与 -${Math.min(30,p.biz*.3).toFixed(1)}%</span>
+   <span>魅力 Lv${p.cha}</span><span>好感度の上昇 +${p.cha}%</span>
+   <span>人脈 Lv${p.net}</span><span>広告費 -${Math.min(30,p.net*.3).toFixed(1)}%・営業でコネ</span></div>
+   <div class="acts"><button class="btn" data-a="presAct" data-k="plan">企画会議<small>行動力1・無料</small></button><button class="btn" data-a="presAct" data-k="biz">経営セミナー<small>行動力1・10万円</small></button>
+   <button class="btn" data-a="presAct" data-k="net">営業まわり<small>行動力1・5万円（コネ）</small></button>
+   <button class="btn primary" data-a="presAct" data-k="party">全員ランチ<small>女性社員全員の好感度UP・${yen(4000*S.staff.length)}</small></button></div></div>
+  ${L.length?`<div class="card"><h3>社内の人間関係 ♥ ${L.length}人</h3><div class="sm mute">恋人は成果 +10%＋絆ボーナス。人数に上限はありません（9人目からハーモニーが少しずつ下がり、ジェラシー事件が起きることも。ラウンジ系の設備で改善）。<br>現在のハーモニー：<b class="${harmony()<70?'red':'mint'}">${harmony()}</b>${harmony()<70?'（成果が少し下がっています。ラウンジ系の設備で改善）':''}</div>
+   <div class="row" style="margin-top:8px;gap:6px">${L.slice(0,24).map(e=>`<button data-a="empOpen" data-id="${e.id}" style="background:none;border:0;padding:0;cursor:pointer" title="${esc(e.name)}">${avatar(e,44)}</button>`).join('')}${L.length>24?`<span class="sm mute">ほか${L.length-24}人</span>`:''}</div></div>`:''}
+  ${roomCard()}${tripCard()}${clubCard()}
+  <h3>設備</h3>${facs}
+  <h3>研究開発 <span class="sm mute">上限なしの投資</span></h3>${RDS.map(r=>`<div class="card" style="padding:10px 12px"><div class="row sp"><div class="grow"><b>${r.n}</b> <span class="tag">Lv ${S.rd[r.id]||0}</span><div class="sm mute">${r.d}</div></div><button class="btn small" data-a="buyRD" data-id="${r.id}">${yen(rdCost(S.rd[r.id]||0))}</button></div></div>`).join('')}</div>`;
+}
+function tabRec(){
+  const done=ACHS.filter(a=>S.ach[a.id]).length;
+  const HID=new Set(['ch50','club','out1','out10','hr10','hr100','f10','f20','fa','f50','l1','l3','l5','l10','l20','d10','d50','gf','ty','k1','k10','k30','k100']);
+  const ach=ACHS.map(a=>HID.has(a.id)&&!S.ach[a.id]?`<div class="card ach" style="padding:8px 12px"><div class="ic">？</div><div class="grow"><b>？？？</b><div class="sm mute">隠し実績</div></div></div>`:`<div class="card ach ${S.ach[a.id]?'done':''}" style="padding:8px 12px"><div class="ic">${S.ach[a.id]?'✓':'・'}</div><div class="grow"><b>${a.n}</b><div class="sm mute">${a.d}${a.r.conne?`　報酬:コネ+${a.r.conne}`:''}${a.r.money?`　報酬:${yen(a.r.money)}`:''}</div></div></div>`).join('');
+  const dex=NAMED.map(n=>{const got=S.dex[n.id];const fake={seed:n.seed,g:n.g||'F',mot:got?80:50,aff:got?40:0,name:got?n.name:'？？？'};
+    return`<div class="card dex ${got?'':'no'}" style="padding:8px 12px">${avatar(fake,48,{svg:1})}<div class="grow"><b>${got?esc(n.name):'？？？'}</b> <span class="tag ${n.rar===3?'ssr':'sr'}">${RAR[n.rar]}</span><div class="sm mute">${got?esc(n.bio):'ヘッドハントで出会えるかもしれない。'}</div></div></div>`}).join('');
+  const types=TYPES.map((t,i)=>`<span class="tag ${S.typeDex[i]?'love':''}">${S.typeDex[i]?'✓':'・'}${t.n}</span>`).join(' ');
+  const L=S.legacy;
+  const perks=PERKS.map(p=>{const l=perk(p.id),mx=l>=p.max;return`<div class="card" style="padding:8px 12px"><div class="row sp"><div class="grow"><b>${p.n}</b> <span class="tag">Lv ${l}/${p.max}</span><div class="sm mute">${p.d}</div></div><button class="btn small" data-a="perk" data-id="${p.id}" ${mx?'disabled':''}>${mx?'MAX':p.c(l)+'pt'}</button></div></div>`}).join('');
+  return`<h2>記録</h2><div class="stack">
+  <div class="card"><h3>これまで</h3><div class="kv"><span>発売本数</span><span>${S.stat.games}本（ヒット ${S.stat.hits}本）</span><span>最高スコア</span><span>${S.stat.best.toFixed(1)}</span><span>累計売上</span><span>${yen(S.stat.rev)}</span><span>知名度 / ファン</span><span>${num(S.fame)} / ${num(S.fans)}人</span><span>子供</span><span>${kidsTotal()}人</span><span>経過</span><span>${calStr()}（${S.week}週）</span><span>再起業</span><span>${L.runs}回</span></div></div>
+  <div class="card ${canReborn()?'hl':''}"><div class="row sp"><div><h3 style="margin:0">再起業（転生）</h3><div class="sm mute">累計売上2億円 または 知名度300 で解放。<br>獲得予定：<b class="amber">${legacyGain()} pt</b>（所持 ${L.pts} pt）</div></div>
+   <button class="btn primary" data-a="rebornOpen" ${canReborn()?'':'disabled'}>会社を売却</button></div></div>
+  <h3>レガシー強化（永続）</h3>${perks}
+  ${titleCard()}
+  <h3>図鑑 ${Object.keys(S.dex).length}/${NAMED.length}</h3><div class="card"><div class="sm mute" style="margin-bottom:4px">集めた社員の性格タイプ（女性）</div>${types}</div>${dex}
+  <h3>実績 ${done}/${ACHS.length}</h3>${ach}
+  <div class="card"><h3>セーブデータ</h3><div class="sm mute" style="margin-bottom:6px">この端末のブラウザに自動保存されます。別の端末へは文字列で移せます。</div>
+   <textarea id="savebox" aria-label="セーブデータ" placeholder="ここに書き出し／貼り付け"></textarea>
+   <div class="row" style="margin-top:6px"><button class="btn small" data-a="exp">書き出し</button><button class="btn small" data-a="cp">コピー</button><button class="btn small" data-a="imp">読み込み</button><button class="btn small warn" data-a="${G.resetAsk?'reset':'resetAsk'}">${G.resetAsk?'本当に全消去':'最初からやり直す'}</button></div></div></div>`;
+}
+function roomCard(){
+  const it=S.room.items;
+  const wall=S.staff.filter(e=>e.lover||e.aff>=62).sort((a,b)=>b.aff-a.aff).slice(0,12);
+  const sec=it.sec?`<label class="f" style="margin-top:8px">秘書<select id="secSel" data-s="sec"><option value="">指名なし</option>${S.staff.slice().sort((a,b)=>b.aff-a.aff).slice(0,60).map(e=>`<option value="${e.id}" ${S.sec===e.id?'selected':''}>${esc(e.name)}</option>`).join('')}</select></label>`:'';
+  return`<div class="card"><h3>社長室</h3><div class="sm mute" style="margin-bottom:8px">調度品を揃えると、社長室が華やかになります。</div>
+   ${it.photo?`<div class="row" style="gap:5px;margin-bottom:8px">${wall.map(e=>avatar(e,36)).join('')||'<span class="sm mute">壁にはまだ写真がありません。</span>'}</div>`:''}
+   ${it.cab?`<div class="sm" style="margin-bottom:8px">🎁 飾り棚：もらったプレゼント ${S.stat.recv}個${S.stat.choco?`（チョコ ${S.stat.choco}個）`:''}</div>`:''}
+   <div class="stack" style="gap:8px">${ROOM_ITEMS.map(x=>`<div class="row sp"><div class="grow"><b>${x.n}</b><div class="sm mute">${x.d}</div></div><button class="btn small" data-a="buyRoom" data-id="${x.id}" ${it[x.id]||S.office<x.min?'disabled':''}>${it[x.id]?'導入済み':S.office<x.min?'要拡張':yen(x.cost)}</button></div>`).join('')}</div>${sec}</div>`;
+}
+function tripCard(){
+  const left=Math.max(0,8-(S.week-S.trip));
+  return`<div class="card"><h3>社員旅行</h3><div class="sm mute" style="margin-bottom:8px">全員のやる気と好感度が上がります（行動力2・8週に1回）${left?`／あと${left}週`:''}</div>
+   <div class="acts">${TRIPS.map(t=>`<button class="btn" data-a="trip" data-id="${t.id}">${t.n}<small>${yen(t.per*S.staff.length)}</small></button>`).join('')}</div></div>`;
+}
+function clubCard(){
+  if(!S.club.vol)return'';
+  return`<div class="card"><h3>社長ファンクラブ</h3><div class="kv"><span>会員数</span><span>${num(S.club.n)}人</span><span>社内報</span><span>vol.${S.club.vol}</span><span>効果</span><span>ゲームの売上 +${Math.min(30,S.club.n*.2).toFixed(1)}%</span></div></div>`;
+}
+function titleCard(){
+  const earned=TITLES.filter(t=>t.c());
+  return`<div class="card"><h3>称号</h3><div class="sm mute" style="margin-bottom:6px">表示する称号を選べます。現在：<b>${esc(curTitle())}</b></div>
+   <div class="picks"><button class="pick ${!S.titleSel?'on':''}" data-a="setTitle" data-id="">おまかせ</button>${earned.map(t=>`<button class="pick ${S.titleSel===t.id?'on':''}" data-a="setTitle" data-id="${t.id}">${esc(t.n)}</button>`).join('')}</div></div>`;
+}
+function rebornModal(){
+  const cap=carryCap();G.carry=G.carry||[];
+  const list=S.staff.slice().sort((a,b)=>b.rar-a.rar||b.lv-a.lv).map(e=>`<button class="pick ${G.carry.includes(e.id)?'on':''}" data-a="carryTog" data-id="${e.id}" style="display:flex;gap:8px;align-items:center;text-align:left">${avatar(e,36)}<span>${esc(e.name)}<br><span class="tiny mute">${RAR[e.rar]} Lv${e.lv}${e.lover?' ♥':''}</span></span></button>`).join('');
+  return`<h2>再起業</h2><div class="sm">会社を売却して、新しい会社を立ち上げます。資金・社員・設備はリセットされますが、<b>実績・図鑑・相性データ・ジャンル熟練・レガシー</b>は残ります。<br>獲得：<b class="amber">${legacyGain()} pt</b></div>
+  <h3 style="margin-top:10px">引き継ぐ社員（最大${cap}人：${G.carry.length}選択中）</h3><div class="picks" style="margin-bottom:12px">${list}</div>
+  <div class="row sp"><button class="btn" data-a="closeModal">やめる</button><button class="btn primary" data-a="rebornDo">再起業する</button></div>`;
+}
+
+/* ====== render ====== */
+const TABS=[['home','ホーム','⌂'],['staff','社員','♥'],['dev','開発','▶'],['hire','採用','＋'],['corp','会社','▣'],['rec','記録','★']];
+function render(){
+  if(!S)return;
+  const neg=S.money<0;
+  document.getElementById('hud').innerHTML=`<div class="hud-in"><div class="hud-top"><span class="co">${esc(S.name)} <span class="tag" style="font-family:var(--body)">${esc(curTitle())}</span></span><span class="date">${calStr()}</span></div>
+  <div class="chips"><span class="chip money ${neg?'neg':''}">資金 <b>${yen(S.money)}</b></span><span class="chip fame">知名度 <b>${num(S.fame)}</b></span><span class="chip conne">コネ <b>${S.conne}</b></span><span class="chip">社員 <b>${S.staff.length}/${capacity()}</b></span>${lovers().length?`<span class="chip">♥ <b>${lovers().length}</b></span>`:''}${kidsTotal()?`<span class="chip">子供 <b>${kidsTotal()}人</b></span>`:''}<span class="chip ap" title="行動力" style="display:inline-flex;gap:5px;align-items:center">行動力 <span class="ap">${Array.from({length:apMax()},(_,i)=>`<i class="${i<S.ap?'':'off'}"></i>`).join('')}</span></span></div></div>`;
+  const fn={home:tabHome,staff:tabStaff,dev:tabDev,hire:tabHire,corp:tabCorp,rec:tabRec}[G.tab];
+  const act=document.activeElement;const keepId=act&&act.id&&act.tagName!=='BUTTON'?act.id:null;
+  document.getElementById('main').innerHTML=fn();
+  if(keepId){const n=document.getElementById(keepId);if(n&&n.focus)n.focus()}
+  const apmax=apMax();
+  const dots=Array.from({length:apmax},(_,i)=>`<i class="${i<S.ap?'':'off'}"></i>`).join('');
+  const badge={home:S.staff.some(e=>e.inv),dev:S.proj.length<slotsMax()&&S.staff.length>0};
+  document.getElementById('foot').innerHTML=`<div class="adv">
+   <button class="btn primary" data-a="next" ${S.over?'disabled':''}>次の週へ ▶</button><button class="btn" data-a="next4">4週</button><button class="btn ${G.auto?'primary':''}" data-a="auto" aria-pressed="${G.auto}">${G.auto?'■ 停止':'自動'}</button></div>
+   <div class="tabs" style="grid-template-columns:repeat(6,1fr)">${TABS.map(([k,n,i])=>`<button class="tab ${G.tab===k?'on':''}" data-a="tab" data-t="${k}"><b>${i}</b>${n}${badge[k]?'<span class="dot"></span>':''}</button>`).join('')}</div>`;
+  if(G.empId||G.modalFn)renderModal();
+}
+
+/* ====== input ====== */
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-a]');if(!t)return;
+  const a=t.dataset.a,d=t.dataset;
+  if(a==='bgClose'){if(ev.target===t&&!G.locked)closeModal();return}
+  if(a==='tab'){ev.preventDefault();G.tab=d.t;window.scrollTo(0,0);render();return}
+  if(a==='sceneBtn'){const o=curScene,b=o&&(o.btns||[{f:()=>{}}])[+d.i];nextSceneFrom(b);return}
+  if(!S)return;
+  switch(a){
+    case 'next':nextWeek();render();if(S.greet&&S.greet[0]&&!sceneOpen){const e=empById(S.greet[0].id);if(e)toast('💋 '+(e.name.split(' ')[1]||e.name)+'が朝のキスで迎えてくれた'+(S.greetN>1?`（ほか${S.greetN-1}人）`:''))}break;
+    case 'next4':{for(let i=0;i<4&&!sceneOpen&&!S.over;i++)nextWeek();render();break}
+    case 'auto':G.auto=!G.auto;render();if(G.auto)autoLoop();break;
+    case 'empOpen':G.empId=+d.id;G.react='';G.fireAsk=null;renderModal();break;
+    case 'closeModal':closeModal();break;
+    case 'act':{if(d.k==='talk'&&!G.empId){if(S.ap<1){toast('行動力が足りません（次の週で回復）');break}empAct(+d.id,'talk');const e=empById(+d.id);toast((e.name.split(' ')[1]||e.name)+'：'+G.react.split('\n')[0].slice(0,28));G.react='';break}
+      empAct(+d.id,d.k,d.x===''?null:(d.x!==undefined?+d.x:undefined));break}
+    case 'fireAsk':G.fireAsk=+d.id;renderModal();break;
+    case 'fire':G.fireAsk=null;fire(+d.id);break;
+    case 'tutOff':S.tutorial=false;render();break;
+    case 'filter':G.filter=d.v;render();break;
+    case 'more':G.limit+=30;render();break;
+    case 'pickImg':{const id=+d.id;G.empId=null;showModal(()=>{const e=empById(id);if(!e)return null;return`<div class="row sp"><h2 style="margin:0">顔画像を選ぶ</h2><button class="btn small" data-a="imgBack" data-id="${id}">戻る</button></div><div class="picks" style="margin-top:10px">${poolOf(e).av.map(n=>`<button class="pick ${e.img===n?'on':''}" data-a="setImg" data-id="${id}" data-n="${n}" style="padding:3px"><img src="${poolOf(e).src[n]}" width="64" height="64" alt="${n}" style="object-fit:cover;object-position:50% 12%;border-radius:8px;display:block"><span class="tiny mute">${n}</span></button>`).join('')}</div>`});break}
+    case 'setImg':{const e=empById(+d.id);if(e)e.img=+d.n;save();G.modalFn=null;G.empId=+d.id;render();break}
+    case 'imgBack':G.modalFn=null;G.empId=+d.id;render();break;
+    case 'acceptInv':{acceptInvite(+d.id,false);checkAch();save();render();break}
+    case 'declineInv':declineInvite(+d.id);break;
+    case 'acceptAll':acceptAllInvites();break;
+    case 'heart':heartEvent(+d.id);break;
+    case 'trip':doTrip(d.id);break;
+    case 'buyRoom':buyRoom(d.id);break;
+    case 'setTitle':S.titleSel=d.id||null;save();render();break;
+    case 'hireF':G.hireF=!G.hireF;render();break;
+    case 'recruit':recruit(d.id);break;
+    case 'interview':{const c=S.cand.find(x=>x.id===+d.id);if(c&&!c.rev&&useAP()){c.rev=true;save();render()}break}
+    case 'hire':hire(+d.id);break;
+    case 'startProj':startProject();break;
+    case 'takeContract':takeContract(+d.id);break;
+    case 'cancelP':cancelProject(+d.id);break;
+    case 'relP':forceRelease(+d.id);break;
+    case 'hypeP':pr(+d.id,'hype');break;
+    case 'assignAll':assignAll(+d.id);break;
+    case 'unassignAll':unassignAll(+d.id);break;
+    case 'toggleAssign':toggleAssign(+d.id,+d.p);break;
+    case 'presAct':presAct(d.k);break;
+    case 'buyOffice':buyOffice();break;
+    case 'buyFac':buyFac(d.id);break;
+    case 'buyRD':buyRD(d.id);break;
+    case 'perk':buyPerk(d.id);break;
+    case 'rebornOpen':G.carry=[];showModal(rebornModal);break;
+    case 'carryTog':{const i=+d.id,x=G.carry.indexOf(i);if(x>=0)G.carry.splice(x,1);else if(G.carry.length<carryCap())G.carry.push(i);else toast('引き継ぎ枠は最大'+carryCap()+'人です');renderModal();break}
+    case 'rebornDo':doReborn(G.carry||[],false);break;
+    case 'exp':{const b=document.getElementById('savebox');b.value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));b.select();break}
+    case 'cp':{const b=document.getElementById('savebox');if(!b.value)b.value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));b.select();try{navigator.clipboard.writeText(b.value).then(()=>toast('コピーしました'),()=>toast('選択済みです。手動でコピーしてください'))}catch(e){toast('選択済みです。手動でコピーしてください')}break}
+    case 'imp':{const b=document.getElementById('savebox');try{const s=JSON.parse(decodeURIComponent(escape(atob(b.value.trim()))));if(s&&s.v===1){S=s;save();G.empId=null;toast('読み込みました');render()}else toast('データが正しくありません')}catch(e){toast('データが正しくありません')}break}
+    case 'resetAsk':G.resetAsk=true;render();break;
+    case 'reset':{G.resetAsk=false;try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=newState();initGame();break}
+    case 'startGame':{const v=(document.getElementById('coName').value||'').trim();if(v)S.name=v.slice(0,16);closeModal();G.locked=false;save();render();break}
+  }
+});
+function nextSceneFrom(b){if(b&&b.f)b.f();nextScene()}
+document.addEventListener('change',ev=>{
+  const t=ev.target;if(!t.dataset||!t.dataset.s)return;
+  if(t.dataset.s==='sort'){G.sort=t.value;render()}
+  else if(t.dataset.s==='sec'){S.sec=t.value?+t.value:null;save();render()}
+  else if(t.dataset.s==='form'){G.form[t.dataset.key]=+t.value;render()}
+});
+document.addEventListener('input',ev=>{const t=ev.target;if(t.dataset&&t.dataset.s==='title')G.form.title=t.value});
+function autoLoop(){
+  if(!G.auto)return;
+  if(!sceneOpen&&!S.over&&!G.modalFn&&!G.empId){nextWeek();render()}
+  setTimeout(autoLoop,650);
+}
+
+/* ====== init ====== */
+function initGame(){
+  if(!S.staff.length&&S.week===0&&!S.stat.hired){
+    const e=genEmp({rar:1,g:'F'}),m=genEmp({rar:1,g:'M'});e.mot=75;m.mot=75;S.staff.push(e,m);S.stat.hired=2;S.typeDex[e.type]=true;
+    genContracts();logm('スタジオを設立した！','hi');checkAch();
+    G.locked=true;
+    showModal(()=>`<div class="title-big">ドリームピクセルスタジオ</div><div class="sm mute" style="margin-bottom:12px">小さなオフィスから、世界一のゲーム会社へ。</div>
+     <div class="row" style="margin-bottom:12px;flex-wrap:nowrap">${avatar(S.staff[0],64)}${avatar(S.staff[1],64)}<div class="grow sm"><b>${esc(S.staff[0].name)}</b>と<b>${esc(S.staff[1].name)}</b>が最初の社員として入社してくれました。<br>「社長、これからよろしくお願いします！」</div></div>
+     <label class="f">会社名<input type="text" id="coName" value="${esc(S.name)}" maxlength="16"></label>
+     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" data-a="startGame">経営スタート</button></div>`);
+  }
+  render();
+}
+G.limit=30;
+(function boot(){
+  const s=load();
+  if(s){S=s;if(!S.contracts.length)genContracts()}else S=newState();
+  initGame();
+  loadImages();
+})();
+
+</script>
+</body>
+</html>
