@@ -658,7 +658,7 @@ function presAct(kind){
     const c=4000*S.staff.length;if(S.ap<1)return useAP();if(!spend(c))return;useAP();
     const m=(1+S.pres.cha*.01+perk('charm')*.08);
     for(const e of fs){e.mot=Math.min(100,e.mot+8);e.fat=Math.max(0,e.fat-6);addAff(e,3.5*m*tMul(e,'aff'))}
-    gainPres('cha',3);toast(`全員ランチ！ 女性社員${fs.length}人の好感度アップ`);
+    gainPres('cha',3);toast(`全員ランチ！ 女性社員${fs.length}人の好感度アップ（-${yen(c)}）`);logm(`全員ランチを開催（費用 ${yen(c)}）`,'gd');
   }
   else if(kind==='market'){
     if(S.ap<1)return useAP();if(!spend(200000))return;useAP();
@@ -935,7 +935,7 @@ function heartEvent(id){
   if(!useAP())return;
   e.heartW=S.week;S.stat.heart++;e.tot=(e.tot||0)+1;
   const nm=e.name.split(' ')[1]||e.name,crit=Math.random()<.2;
-  const gain=(crit?24:14)*R(.9,1.15)*(1+S.pres.cha*.01+perk('charm')*.08)*tMul(e,'aff');
+  const gain=(crit?70:40)*R(.9,1.15)*(1+S.pres.cha*.01+perk('charm')*.08)*tMul(e,'aff');
   scene({who:e,title:'💗 ふたりの時間',html:esc(pick(HEART_SC).replace(/\{n\}/g,nm)+'\n'+(e.lover?LOVE_TALK[e.type]:TALK[e.type][1])+`\n\n（好感度 +${gain.toFixed(1)}${crit?'　ドキドキ度MAX！':''}）`)});
   addAff(e,gain);e.mot=Math.min(100,e.mot+15);
   checkAch();save();render();
