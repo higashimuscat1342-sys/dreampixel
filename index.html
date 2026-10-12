@@ -1701,7 +1701,18 @@ function tabRec(){
   <h3>実績 ${done}/${ACHS.length}</h3>${ach}
   <div class="card"><h3>セーブデータ</h3><div class="sm mute" style="margin-bottom:6px">この端末のブラウザに自動保存されます。別の端末へは文字列で移せます。</div>
    <textarea id="savebox" aria-label="セーブデータ" placeholder="ここに書き出し／貼り付け"></textarea>
-   <div class="row" style="margin-top:6px"><button class="btn small" data-a="exp">書き出し</button><button class="btn small" data-a="cp">コピー</button><button class="btn small" data-a="imp">読み込み</button><button class="btn small" data-a="expFile">ファイル保存</button><button class="btn small" data-a="impFile">ファイル読込</button><input type="file" id="saveFile" accept=".json,.txt,application/json,text/plain" hidden><button class="btn small warn" data-a="${G.resetAsk?'reset':'resetAsk'}">${G.resetAsk?'本当に全消去':'最初からやり直す'}</button></div></div></div>`;
+   <div class="row" style="margin-top:6px"><button class="btn small" data-a="exp">書き出し</button><button class="btn small" data-a="cp">コピー</button><button class="btn small" data-a="imp">読み込み</button><button class="btn small" data-a="expFile">ファイル保存</button><button class="btn small" data-a="impFile">ファイル読込</button><input type="file" id="saveFile" accept=".json,.txt,application/json,text/plain" hidden><button class="btn small warn" data-a="${G.resetAsk?'reset':'resetAsk'}">${G.resetAsk?'本当に全消去':'最初からやり直す'}</button></div></div>${installCard()}</div>`;
+}
+function isStandalone(){try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}}
+function installCard(){
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),http=/^https?:$/.test(location.protocol);
+  let body;
+  if(isStandalone())body='<div class="sm">✅ すでにアプリとして起動しています。</div>';
+  else if(window.__dpsInstall)body='<div class="sm mute" style="margin-bottom:6px">ホーム画面／デスクトップに追加して、アプリのように起動できます。</div><button class="btn primary" data-a="installApp">📲 アプリをインストール</button>';
+  else if(!http)body='<div class="sm mute">ファイルを直接開いている間はインストールできません。https のWebサイトに置いて開いてください。</div>';
+  else if(ios)body='<div class="sm mute">Safariの共有ボタン（□↑）→「ホーム画面に追加」でインストールできます。</div>';
+  else body='<div class="sm mute" style="margin-bottom:6px">ブラウザのメニュー（⋮）→「アプリをインストール」または「ホーム画面に追加」でインストールできます。</div><button class="btn small" data-a="installApp">インストールを試す</button>';
+  return`<div class="card"><h3>📲 アプリ</h3>${body}</div>`;
 }
 function chatRow(c){const e=empById(c.id);return`<div class="crow">${avatar(e,28)}<div><div class="tiny mute">${esc(fnm(e))}</div><div class="cb">${esc(c.t)}</div></div></div>`}
 function chatCard(){
@@ -1860,6 +1871,7 @@ document.addEventListener('click',ev=>{
     case 'exp':{const b=document.getElementById('savebox');b.value=packSave();b.select();toast(`書き出しました（${b.value.length.toLocaleString()}文字）`);break}
     case 'cp':{const b=document.getElementById('savebox');if(!b.value)b.value=packSave();b.select();try{navigator.clipboard.writeText(b.value).then(()=>toast(`コピーしました（${b.value.length.toLocaleString()}文字）`),()=>toast('選択済みです。手動でコピーしてください'))}catch(e){toast('選択済みです。手動でコピーしてください')}break}
     case 'imp':{const b=document.getElementById('savebox');const r=importSave(b.value);toast(r.msg);if(r.ok)render();break}
+    case 'installApp':{const ip=window.__dpsInstall;if(ip){ip.prompt();ip.userChoice.then(()=>{window.__dpsInstall=null;render()}).catch(()=>{})}else toast('ブラウザのメニューから「アプリをインストール」を選んでください');break}
     case 'expFile':{try{const bl=new Blob([JSON.stringify(S)],{type:'application/json'});const u=URL.createObjectURL(bl);const a=document.createElement('a');a.href=u;a.download='dream-pixel-save.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('ファイルに保存しました')}catch(e){toast('保存できませんでした')}break}
     case 'impFile':{const i=document.getElementById('saveFile');if(i)i.click();break}
     case 'resetAsk':G.resetAsk=true;render();break;
@@ -1902,6 +1914,8 @@ G.limit=30;
   initGame();
   loadImages();
 })();
+
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__dpsInstall=e;try{if(S&&G.tab==='rec')render()}catch(_){}});window.addEventListener('appinstalled',()=>{window.__dpsInstall=null;try{toast('インストールしました');render()}catch(_){}});
 
 ;if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 
