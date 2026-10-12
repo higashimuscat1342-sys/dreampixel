@@ -872,7 +872,7 @@ function nextWeek(){
   morningGreet();
   seasonal();
   outsiderRoll();
-  seatStep();oshiStep();chatStep();mileStep();
+  seatStep();oshiStep();chatStep();mileStep();conspireStep();
   if(S.week%48===0){awards();almanac()}
   rollEvent();
   checkAch();
@@ -1119,6 +1119,28 @@ function mileStep(){
     scene({whoList:grp,hearts:80,title:'🎉 '+M.t,html:esc(`${M.intro}\n\n${say}\n\n${M.outro}\n\n（好感度の高い女性 ${n}人／お祝い金 ${yen(gift)}）`),
       btns:[{l:'みんなの気持ちを受け取る ♥',p:1,f:()=>{S.money+=gift;S.fame+=m;S.hb=Math.min(30,(S.hb||0)+12);for(const e of H){bulkAff(e,3);e.mot=Math.min(100,e.mot+10)}S.stat.parties++;logm(`好感度の高い女性が${m}人に！ みんなにお祝いされた`,'hi');evtPlay('mile',H);checkAch();save();render()}}]});
   }
+}
+function conspireStep(){
+  if(G.auto)return;
+  const H=hiAff().filter(e=>!(e.mat>0));if(H.length<3)return;
+  S.gcd=S.gcd||{};const last=S.gcd.conspire??-99;
+  if(S.week-last<6)return;
+  const ch=Math.min(.6,.25+H.length*.01);if(S.week-last<14&&Math.random()>ch)return;
+  S.gcd.conspire=S.week;
+  const grp=H.slice().sort(()=>Math.random()-.5);
+  const OPEN=['昼休み、会議室に女性社員たちが集まってひそひそ話をしている。やがて代表が、にこにこしながらあなたのもとへやって来た。','終業後、{a}があなたの袖をそっと引いた。振り返ると、後ろには{b}たちがずらりと並んでいる。','社長室の扉が、こつこつと控えめにノックされた。入ってきたのは、示し合わせたように揃った女性たち。'];
+  const LINE=['「実は、みんなで相談したんです。今夜は私たちに付き合ってください」','「抜け駆けは禁止、って決めました。だから今夜は、全員で」','「断るなんて、言いませんよね？ みんな待ってたんですから」','「社長が忙しすぎるので、私たちが結託しました♪」','「もう囲んじゃいました。逃げられませんよ？」','「今夜は帰しません。朝までみんなで一緒です」'];
+  const a=fnm(grp[0]),b=fnm(grp[1]||grp[0]);
+  const say=grp.slice(0,6).map(e=>`${fnm(e)}「${callBoss(pick(LINE),e,true)}」`).join('\n');
+  scene({whoList:grp,hearts:30+grp.length*3,title:'💞 みんなからのお誘い',
+    html:esc(`${pick(OPEN).replace('{a}',a).replace('{b}',b)}\n\n${say}${grp.length>6?`\n…ほか${grp.length-6}人も、ぐるりと輪に加わっている。`:''}\n\n気づけば四方八方を囲まれて、逃げ場はどこにもなかった。\n\n（結託している女性 ${H.length}人）`),
+    btns:[{l:'お誘いを受ける ♥',p:1,f:()=>{
+      for(const e of grp){bulkAff(e,4);e.mot=Math.min(100,e.mot+10);e.tot=(e.tot||0)+1}
+      S.hb=Math.min(30,(S.hb||0)+12);S.stat.groups++;S.stat.conspire=(S.stat.conspire||0)+1;
+      const kp=groupPreg(grp,.16);if(kp)toast(`${kp}人が新しい命を授かった`);
+      logm(`${grp.length}人の女性に結託してお誘いされた`,'hi');
+      evtPlay('conspire',grp);checkAch();save();render()}},
+     {l:'今日は遠慮しておく',f:()=>{S.gcd.conspire=S.week-3;for(const e of grp)e.aff=Math.min(100,e.aff+1);toast('「また今度、必ず…」と念を押された');save();render()}}]});
 }
 const FLOOR=[
  {id:'fl1',t:'ラウンジでお茶会',cost:p=>60000*p,ap:1,cd:1,aff:3,hb:8},
