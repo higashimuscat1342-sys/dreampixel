@@ -145,6 +145,7 @@ textarea{min-height:90px;font-family:ui-monospace,monospace;font-size:11px}
 .chat{display:grid;gap:8px}
 .crow{display:flex;gap:8px;align-items:flex-start}
 .crow .cb{background:var(--surf2);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:6px 10px;font-size:13px;line-height:1.5}
+.evimg{display:block;width:100%;max-height:46vh;object-fit:cover;border-radius:12px;margin-bottom:8px;background:var(--surf2)}
 
 html{background:var(--bg)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}
 </style>
@@ -160,11 +161,14 @@ html{background:var(--bg)}body{margin:0}[hidden]{display:none!important}img{max-
 <div id="toast"></div>
 
 <script src="message.html"></script>
+<script src="event.html"></script>
 <script>
+if(!window.EVT){try{var __e=new XMLHttpRequest();__e.open('GET','event.html',false);__e.send();if(__e.status===200&&__e.responseText)(0,eval)(__e.responseText)}catch(e){}}
 if(!window.MSG){try{var __x=new XMLHttpRequest();__x.open('GET','message.html',false);__x.send();if(__x.responseText)(0,eval)(__x.responseText)}catch(e){}}
 if(!window.MSG){document.body.innerHTML='<div style="padding:24px;color:#f3eefb;font-family:sans-serif">message.html を読み込めませんでした。index.html と同じフォルダに置いてください。</div>';throw new Error('message.html not found')}
 const {SUR,FN,MN,NAMED,TALK,LOVE_TALK,SCENES,DATE_PLACES,DATE_Q,GIFT_R,LUNCH_R,TITLE_A,TITLE_B,KISS_LINE,KISS_ACT,INV_LINE,INV_N,NIGHT,OUTSIDERS,HEART_SC,TRIP_PAIR}=window.MSG;
 const _M=window.MSG;
+const EVT=(window.EVT&&window.EVT.EV)||{},EVT_PREG=(window.EVT&&window.EVT.PREG)||null;
 const SWEET=_M.SWEET||['社長、大好きです♡'],LEAVE_LINE=_M.LEAVE_LINE||['今日もお疲れさまでした♡'],SURROUND_LINE=_M.SURROUND_LINE||['社長、今日もお仕事頑張ってくださいね…'],TIER_MOOD=_M.TIER_MOOD||['','','','',''],NICK=_M.NICK||['社長','社長','社長','社長','社長'],GROUP_PLACES=_M.GROUP_PLACES||['遊園地'],GROUP_LINE=_M.GROUP_LINE||['みんなで楽しんだ。'],NIGHT_GROUP=_M.NIGHT_GROUP||['みんなで夜更かしした。'],SLEEPOVER=_M.SLEEPOVER||['みんなでお泊まり会をした。'];
 const CHAT_BOSS=_M.CHAT_BOSS||['今日の社長、かっこよかったね♡'],CHAT_PAIR=_M.CHAT_PAIR||['{b}ちゃん、今度ごはん行こうね'],CHAT_SEAT=_M.CHAT_SEAT||['今週は社長の隣の席でした！'],CHAT_OSHI=_M.CHAT_OSHI||['推し活、がんばってます！'],OSHI_ITEM=_M.OSHI_ITEM||['手作りのお弁当','高級なコーヒー豆'],OSHI_LINE=_M.OSHI_LINE||['推し活です！ 受け取ってください。（{item}）'];
 const MILE=_M.MILE||{10:{t:'祝・10人の推し',intro:'好意を寄せる女性が10人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},30:{t:'祝・30人の推し',intro:'好意を寄せる女性が30人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},50:{t:'祝・50人の推し',intro:'好意を寄せる女性が50人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'},100:{t:'祝・100人の推し',intro:'好意を寄せる女性が100人になった。',lines:['社長、おめでとうございます！'],outro:'みんなが祝福してくれた。'}};
@@ -296,12 +300,12 @@ function newState(prev){
     pres:{plan:1,biz:1,cha:1,net:1,exp:{plan:0,biz:0,cha:0,net:0}},office:0,fac:{},staff:[],cand:[],proj:[],contracts:[],released:[],
     gexp:prev?prev.gexp:Array(8).fill(0),texp:prev?prev.texp:Array(8).fill(0),known:prev?prev.known:{},trend:{g:0,t:0,until:10},
     ach:prev?prev.ach:{},dex:prev?prev.dex:{},typeDex:prev?prev.typeDex:{},
-    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},world:{},apx:0,inv:{love:0},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
+    rd:{eng:0,mkt:0,edu:0},hb:0,gcd:{},roomW:-99,seats:[],chat:[],mile:{},evSeen:{},world:{},apx:0,inv:{love:0},almanac:[],yrBase:null,room:{items:{}},club:{n:0,vol:0},sec:null,trip:-99,titleSel:null,stat:{oshi:0,oshiN:0,floorActs:0,surround:0,groups:0,parties:0,sleeps:0,choco:0,recv:0,bday:0,heart:0,outs:0,trips:0,kids:0,rev:0,games:0,hits:0,best:0,hired:0,gifts:0,dates:0,contracts:0,lovers:0,maxStaff:0,fired:0},
     log:[],pity:0,schoolAt:-99,nextId:1,over:false,legacy:L,tutorial:true,revAll:prev?prev.revAll:0};
   return s;
 }
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
-function migrate(s){s.world=s.world||{};s.apx=s.apx||0;s.inv=s.inv||{love:0};s.stat.potions=s.stat.potions||0;s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
+function migrate(s){for(const e of s.staff)if(e.g==='M')e.lover=false;s.evSeen=s.evSeen||{};s.world=s.world||{};s.apx=s.apx||0;s.inv=s.inv||{love:0};s.stat.potions=s.stat.potions||0;s.almanac=s.almanac||[];if(s.yrBase===undefined)s.yrBase=null;s.stat.kiss=s.stat.kiss||0;s.hb=s.hb||0;s.seats=s.seats||[];s.chat=s.chat||[];s.mile=s.mile||{};for(const k of ['oshi','oshiN','floorActs'])s.stat[k]=s.stat[k]||0;s.gcd=s.gcd||{};if(s.roomW==null)s.roomW=-99;for(const k of ['surround','groups','parties','sleeps'])s.stat[k]=s.stat[k]||0;for(const e of s.staff.concat(s.cand))e.tot=e.tot||0;for(const k of ['choco','recv','bday','heart','outs','trips'])s.stat[k]=s.stat[k]||0;s.room=s.room||{items:{}};s.club=s.club||{n:0,vol:0};if(s.trip==null)s.trip=-99;if(s.sec===undefined)s.sec=null;for(const e of s.staff.concat(s.cand)){if(e.bd==null)e.bd=Math.floor(Math.random()*48);if(e.heartW==null)e.heartW=-99}s.stat.kids=s.stat.kids||0;for(const e of s.staff){e.kids=e.kids||0;e.preg=e.preg||0;e.mat=e.mat||0;e.inv=e.inv||null;e.invW=e.invW||0;if(e.g==='F'&&e.seen>=5)e.lover=true}for(const c of s.cand){c.kids=0;c.preg=0;c.mat=0;c.inv=null}return s}
 function load(){try{const t=localStorage.getItem(SAVE_KEY);if(!t)return null;const s=JSON.parse(t);return s&&s.v===1?migrate(s):null}catch(e){return null}}
 const perk=id=>S.legacy.perks[id]||0;
 const fac=id=>S.fac[id]||0;
@@ -413,7 +417,7 @@ function stageScene(e,st){
   scene({who:e,title:'想いの告白',html:esc(txt),btns:[{l:'想いに応える ♥',p:1,f:()=>acceptLove(e.id)}]});
 }
 function acceptLove(id){
-  const e=empById(id);if(!e||e.lover)return;
+  const e=empById(id);if(!e||e.lover||e.g!=='F')return;
   e.lover=true;e.mot=Math.min(100,e.mot+20);S.stat.lovers=Math.max(S.stat.lovers,lovers().length);
   const n=NAMED.find(x=>x.id===e.named);
   logm(`${e.name} と特別な関係になった ♥`,'hi');
@@ -441,7 +445,7 @@ function say(e,t){G.react=t}
 function bulkAff(e,v){
   e.aff=clamp(e.aff+v*(1+S.pres.cha*.01+perk('charm')*.08),0,100);e.last=S.week;
   const a=stageOf(e);if(a>e.seen)e.seen=a;
-  if(a>=5&&!e.lover){e.lover=true;S.stat.lovers=Math.max(S.stat.lovers,lovers().length);logm(`${e.name} と特別な関係になった ♥`,'hi')}
+  if(a>=5&&!e.lover&&e.g==='F'){e.lover=true;S.stat.lovers=Math.max(S.stat.lovers,lovers().length);logm(`${e.name} と特別な関係になった ♥`,'hi')}
 }
 function tryChild(e){
   bulkAff(e,5);e.mot=Math.min(100,e.mot+12);e.fat=Math.max(0,e.fat-8);
@@ -666,7 +670,7 @@ function presAct(kind){
 }
 function buyOffice(){
   const n=OFFICES[S.office+1];if(!n)return;if(!spend(n.cost))return;S.office++;logm(`${n.n}に移転した！`,'hi');
-  scene({title:'オフィス移転',html:`<b>${n.n}</b>に引っ越しました。\n定員 ${n.cap}名／開発スロット ${SLOTS[S.office]}`});checkAch();save();render();
+  scene({title:'オフィス移転',html:`<b>${n.n}</b>に引っ越しました。\n定員 ${n.cap}名／開発スロット ${SLOTS[S.office]}`});evtPlay('move',hiAff());checkAch();save();render();
 }
 function buyFac(id){
   const f=FACS.find(x=>x.id===id);const lv=fac(id);if(lv>=FAC_MAX)return;if(S.office<f.min)return toast('オフィス拡張で解放');
@@ -806,7 +810,7 @@ function seasonal(){
       scene({title:'🎁 ホワイトデー大作戦',html:`${l.length}人にお返しをする日。予算をどうする？`,btns:[opt('義理の小さなお菓子',1000,2),opt('心を込めた贈り物',5000,6,1),opt('高級ブランドの贈り物',15000,12),{l:'今年はスルー',f:()=>{for(const e of l)e.aff=Math.max(0,e.aff-3)}}]})}}
   if(c.wk===3&&c.mo===7){const fl=S.staff.filter(e=>e.g==='F'&&e.aff>=28);
     if(fl.length>=3){const grp=fl.slice().sort((a,b)=>b.aff-a.aff).slice(0,8);
-      scene({whoList:grp,hearts:Math.min(60,fl.length*2+6),title:'🎂 社長の誕生日',html:esc(`社長室に入ると、${fl.length}人の社員がサプライズで待っていた。\n「お誕生日、おめでとうございます！」\nケーキ、プレゼント、そして頬へのキス。部屋中がハートで満たされた。`),btns:[{l:'みんなに感謝する ♥',p:1,f:()=>{for(const e of fl){bulkAff(e,6);e.mot=Math.min(100,e.mot+10)}S.stat.recv+=fl.length;S.stat.parties++;logm(`社長の誕生日を${fl.length}人が祝ってくれた`,'gd');checkAch();save();render()}}]})}}
+      scene({whoList:grp,hearts:Math.min(60,fl.length*2+6),title:'🎂 社長の誕生日',html:esc(`社長室に入ると、${fl.length}人の社員がサプライズで待っていた。\n「お誕生日、おめでとうございます！」\nケーキ、プレゼント、そして頬へのキス。部屋中がハートで満たされた。`),btns:[{l:'みんなに感謝する ♥',p:1,f:()=>{for(const e of fl){bulkAff(e,6);e.mot=Math.min(100,e.mot+10)}S.stat.recv+=fl.length;S.stat.parties++;logm(`社長の誕生日を${fl.length}人が祝ってくれた`,'gd');evtPlay('bday',fl);checkAch();save();render()}}]})}}
   if(c.wk===2&&c.mo===8){for(const e of S.staff){e.mot=Math.min(100,e.mot+8);e.fat=Math.max(0,e.fat-15)}scene({title:'社内納涼会',html:'屋上でバーベキュー納涼会を開いた。\n全員のやる気が上がり、疲労が抜けた。'})}
   if(c.wk===3&&c.mo===12){for(const e of S.staff){e.mot=Math.min(100,e.mot+10);addAff(e,e.g==='F'?2:1)}scene({title:'忘年会',html:'一年お疲れさま！ 大いに盛り上がった。\n（全員のやる気+10・好感度+2）'})}
 }
@@ -981,12 +985,12 @@ function doTrip(id){
   const fs=S.staff.filter(e=>e.g==='F').sort(()=>Math.random()-.5).slice(0,3);
   if(fs.length>=2)scene({title:'社員旅行：'+t.n,html:esc(t.txt+'\n\n夜、班分けのくじ引きで同じ班になる相手が決まる。…あなたが選べるとしたら？'),btns:fs.map(e=>({l:e.name.split(' ')[1]||e.name,f:()=>{bulkAff(e,12);e.mot=100;scene({who:e,title:'旅先の夜',html:esc(pick(TRIP_PAIR).replace('{a}',e.name.split(' ')[1]||e.name)+'\n（好感度 +12）')});save();render()}}))});
   else scene({title:'社員旅行：'+t.n,html:esc(t.txt)});
-  const LL=lovers();if(LL.length>=3){const grp=LL.slice().sort(()=>Math.random()-.5).slice(0,8);for(const e of LL)bulkAff(e,2);scene({whoList:grp,hearts:Math.min(50,LL.length*2),title:'旅先の夜の宴会',html:esc('夜は大広間でみんなで宴会になった。気づけば、恋人たちが次々とあなたの隣に集まってくる。\n（恋人全員の好感度 +2）')})}
+  const LL=lovers();if(LL.length>=3){const grp=LL.slice().sort(()=>Math.random()-.5).slice(0,8);for(const e of LL)bulkAff(e,2);scene({whoList:grp,hearts:Math.min(50,LL.length*2),title:'旅先の夜の宴会',html:esc('夜は大広間でみんなで宴会になった。気づけば、恋人たちが次々とあなたの隣に集まってくる。\n（恋人全員の好感度 +2）')});evtPlay('trip',LL)}
   checkAch();save();render();
 }
 function buyRoom(id){
   const it=ROOM_ITEMS.find(x=>x.id===id);if(!it||S.room.items[id])return;if(S.office<it.min)return toast('オフィス拡張で解放');if(it.req&&!S.room.items[it.req])return toast('先に前の施設が必要です');
-  if(!spend(it.cost))return;S.room.items[id]=1;toast(it.n+'を導入した');checkAch();save();render();
+  if(!spend(it.cost))return;S.room.items[id]=1;toast(it.n+'を導入した');if(it.cost>=5e7)evtPlay('move',hiAff());checkAch();save();render();
 }
 const curTitle=()=>{const earned=TITLES.filter(t=>t.c());const sel=S.titleSel&&earned.find(t=>t.id===S.titleSel);if(sel)return sel.n;const pub=earned.filter(t=>!t.r);return pub[pub.length-1].n};
 const bdTxt=e=>{const m=Math.floor(e.bd/4);return`${(m+3)%12+1}月第${e.bd%4+1}週`};
@@ -1025,7 +1029,7 @@ function enterRoom(){
   const grp=L.slice().sort(()=>Math.random()-.5).slice(0,Math.min(8,L.length));
   const lines=grp.map(e=>`${e.name.split(' ')[1]||e.name}「${callBoss(pick(SURROUND_LINE),e,true)}」`).join('\n');
   scene({whoList:grp,hearts:Math.min(70,L.length*2+10),title:'社長室に入ると…',html:esc(`扉を開けた瞬間、恋人たちがわっと寄ってきた。\n\n${lines}${L.length>grp.length?`\n\n…ほか${L.length-grp.length}人も順番待ちをしている。`:''}`),
-    btns:[{l:'みんなに応える ♥',p:1,f:()=>{for(const e of L){bulkAff(e,2);e.mot=Math.min(100,e.mot+4)}const k=groupPreg(L,.05);if(k)toast(`${k}人が新しい命を授かった`);checkAch();save();render()}}]});
+    btns:[{l:'みんなに応える ♥',p:1,f:()=>{for(const e of L){bulkAff(e,2);e.mot=Math.min(100,e.mot+4)}const k=groupPreg(L,.05);if(k)toast(`${k}人が新しい命を授かった`);evtPlay('room',grp);checkAch();save();render()}}]});
 }
 function groupAct(kind){
   const L=lovers().filter(e=>!(e.mat>0));if(L.length<2)return toast('恋人が2人以上必要です');
@@ -1038,6 +1042,7 @@ function groupAct(kind){
   const grp=L.slice().sort(()=>Math.random()-.5).slice(0,8);
   const body=kind==='date'?`${pick(GROUP_PLACES)}へ、恋人${L.length}人全員で出かけた。\n${pick(GROUP_LINE)}`:pick(NIGHT_GROUP);
   scene({whoList:grp,hearts:Math.min(60,L.length*2+8),title:kind==='date'?'恋人みんなでおでかけ':'社長室でみんなで夜更かし',html:esc(`${body}\n\n（全員の好感度+${kind==='date'?3:4}・ハーモニー+${kind==='date'?10:12}）${kp?`\n${kp}人が新しい命を授かった。`:''}`)});
+  evtPlay(kind,L);
   logm(kind==='date'?`恋人${L.length}人でおでかけした`:`恋人${L.length}人と社長室で夜更かしした`,'gd');
   checkAch();save();render();
 }
@@ -1051,13 +1056,14 @@ function sleepover(){
   let kids=0;for(const e of grp){bulkAff(e,8);e.mot=Math.min(100,e.mot+15);e.fat=0;e.tot=(e.tot||0)+1;if(canChild(e)&&Math.random()<.3){e.preg=8;kids++}}
   S.hb=Math.min(30,(S.hb||0)+15);
   scene({whoList:grp,hearts:Math.min(70,grp.length*6),title:'ハーレム専用 お泊まり会',html:esc(`${pick(SLEEPOVER)}\n\n（参加${grp.length}人の好感度+8・ハーモニー+15）${kids?`\n朝、${kids}人が幸せそうにお腹へ手を当てていた。`:''}`)});
+  evtPlay('sleep',grp);
   logm(`社長専用スイートでお泊まり会（${grp.length}人）`,'gd');checkAch();save();render();
 }
 function uchiage(title){
   const n=S.staff.length,cost=5000*n;
   const fl=S.staff.filter(e=>e.g==='F'&&e.aff>=28);
   scene({whoList:fl.slice().sort((a,b)=>b.aff-a.aff).slice(0,8),hearts:Math.min(40,fl.length+6),title:'🍻 打ち上げ・慰労会',html:esc(`『${title}』の成功を祝って、みんなが打ち上げをしたがっている。\n費用は ${yen(cost)}。開きますか？`),btns:[
-    {l:'盛大に開く ♥',p:1,f:()=>{if(S.money<cost)return toast('資金が足りません');S.money-=cost;for(const e of S.staff){e.mot=Math.min(100,e.mot+15);e.fat=0;if(e.g==='F')bulkAff(e,e.lover?6:4)}S.stat.parties++;logm('打ち上げ・慰労会を開いた','gd');checkAch();save();render()}},
+    {l:'盛大に開く ♥',p:1,f:()=>{if(S.money<cost)return toast('資金が足りません');S.money-=cost;for(const e of S.staff){e.mot=Math.min(100,e.mot+15);e.fat=0;if(e.g==='F')bulkAff(e,e.lover?6:4)}S.stat.parties++;logm('打ち上げ・慰労会を開いた','gd');evtPlay('party',fl);checkAch();save();render()}},
     {l:'今回は見送る',f:()=>{}}]});
 }
 
@@ -1111,7 +1117,7 @@ function mileStep(){
     const say=grp.slice(0,6).map(e=>`${fnm(e)}「${callBoss(pick(M.lines),e,true)}」`).join('\n');
     const gift=({10:3e6,30:3e7,50:2e8,100:1.5e9,150:4e9,200:1e10,300:3e10,500:1e11})[m]*(1+S.office);
     scene({whoList:grp,hearts:80,title:'🎉 '+M.t,html:esc(`${M.intro}\n\n${say}\n\n${M.outro}\n\n（好感度の高い女性 ${n}人／お祝い金 ${yen(gift)}）`),
-      btns:[{l:'みんなの気持ちを受け取る ♥',p:1,f:()=>{S.money+=gift;S.fame+=m;S.hb=Math.min(30,(S.hb||0)+12);for(const e of H){bulkAff(e,3);e.mot=Math.min(100,e.mot+10)}S.stat.parties++;logm(`好感度の高い女性が${m}人に！ みんなにお祝いされた`,'hi');checkAch();save();render()}}]});
+      btns:[{l:'みんなの気持ちを受け取る ♥',p:1,f:()=>{S.money+=gift;S.fame+=m;S.hb=Math.min(30,(S.hb||0)+12);for(const e of H){bulkAff(e,3);e.mot=Math.min(100,e.mot+10)}S.stat.parties++;logm(`好感度の高い女性が${m}人に！ みんなにお祝いされた`,'hi');evtPlay('mile',H);checkAch();save();render()}}]});
   }
 }
 const FLOOR=[
@@ -1130,6 +1136,7 @@ function floorAct(id){
   S.hb=Math.min(30,(S.hb||0)+f.hb);const kp=groupPreg(P,.12);
   const grp=P.slice().sort(()=>Math.random()-.5).slice(0,8);
   scene({whoList:grp,hearts:Math.min(70,P.length*3+8),title:f.t,html:esc(`${pick(FLOOR_LINE[id])}\n\n（参加${P.length}人の好感度+${f.aff}・ハーモニー+${f.hb}）${kp?`\n${kp}人が新しい命を授かった。`:''}`)});
+  evtPlay({fl1:'tea',fl2:'bath',fl3:'garden',fl4:'ball'}[id],P);
   logm(`${f.t}（${P.length}人）`,'gd');checkAch();save();render();
 }
 
@@ -1185,7 +1192,7 @@ function buyWorld(id){
   const w=WORLD.find(x=>x.id===id);if(!w||S.world[id])return;
   if(S.office<w.min)return toast('オフィス拡張で解放');if(!spend(w.cost))return;
   S.world[id]=1;S.fame+=w.fame;logm(`${w.n}へ海外展開した！`,'hi');
-  scene({title:`🌏 ${w.n}へ展開`,html:esc(`${w.n}での販売網が整った。\n以後、すべての発売タイトルの売上が +${Math.round(w.m*100)}%。\n（知名度 +${w.fame}）`)});
+  scene({title:`🌏 ${w.n}へ展開`,html:esc(`${w.n}での販売網が整った。\n以後、すべての発売タイトルの売上が +${Math.round(w.m*100)}%。\n（知名度 +${w.fame}）`)});evtPlay('world',hiAff());
   checkAch();save();render();
 }
 (function(){
@@ -1210,7 +1217,32 @@ function buyWorld(id){
   T('xm',[150,200,300,500],['百五十の想い','二百の想い','三百の想い','五百の想い'],v=>`好感度の高い女性が${v}人`,v=>!!(S.mile&&S.mile[v]),{hid:1,love:1});
 })();
 
-function groupPreg(list,p){let k=0;for(const e of list){if(canChild(e)&&Math.random()<p){e.preg=8;k++}}if(k)logm(`みんなで過ごした後、${k}人が新しい命を授かった`,'gd');return k}
+function groupPreg(list,p){let k=0;G.lastPreg=[];for(const e of list){if(canChild(e)&&Math.random()<p){e.preg=8;k++;G.lastPreg.push(e)}}if(k)logm(`みんなで過ごした後、${k}人が新しい命を授かった`,'gd');return k}
+
+/* ====== v9: special events (event.html) ====== */
+const skipEvt=()=>{SQ=SQ.filter(o=>!o.evt)};
+function evtPlay(key,grp,o){
+  const E=EVT[key];if(!E||!E.v||!E.v.length)return;
+  grp=(grp||[]).filter(e=>e&&e.g==='F'&&!(e.mat>0));if(grp.length<2)return;
+  S.evSeen=S.evSeen||{};
+  if(S.evSeen[key]&&Math.random()>(E.rate==null?1:E.rate))return;
+  S.evSeen[key]=(S.evSeen[key]||0)+1;
+  const vi=Math.floor(Math.random()*E.v.length),pages=E.v[vi];
+  const sh=grp.slice().sort(()=>Math.random()-.5);const nm=i=>fnm(sh[i%sh.length]);
+  const rep=t=>callBoss(t.replace(/\{a\}/g,nm(0)).replace(/\{b\}/g,nm(1)).replace(/\{c\}/g,nm(2)).replace(/\{n\}/g,(o&&o.n)||grp.length),sh[0],true);
+  const suf=['','b','c'][vi]||'';const img=E.img?(suf?E.img.replace(/\.jpg$/i,suf+'.jpg'):E.img):'';
+  const k=E.preg?groupPreg(sh,E.preg):0;const pe=(G.lastPreg||[]).slice();
+  pages.forEach((t,i)=>{const last=i===pages.length-1;
+    scene({evt:true,img,img0:E.img||'',hearts:i===0?Math.min(60,sh.length*3+8):0,whoList:i===0?sh.slice(0,8):null,title:`${E.title}${pages.length>1?`（${i+1}/${pages.length}）`:''}`,html:esc(rep(t)),
+      btns:[{l:last?'閉じる':'次へ',p:1,f:()=>{}},...(last?[]:[{l:'イベントをスキップ',f:skipEvt}])]})});
+  S.stat.groups=S.stat.groups||0;
+  if(k&&EVT_PREG&&EVT_PREG.v&&EVT_PREG.v.length){
+    const names=pe.map(fnm);const nstr=names.slice(0,3).join('・')+(names.length>3?'ほか':'');
+    const pp=pick(EVT_PREG.v);
+    pp.forEach((t,i)=>scene({img:EVT_PREG.img||'',img0:EVT_PREG.img||'',hearts:i===0?30:0,whoList:i===0?pe.slice(0,8):null,title:`${EVT_PREG.title}${pp.length>1?`（${i+1}/${pp.length}）`:''}`,
+      html:esc(t.replace(/\{names\}/g,nstr).replace(/\{k\}/g,k)),btns:[{l:i===pp.length-1?'閉じる':'次へ',p:1,f:()=>{}}]}));
+  }
+}
 
 /* ====== portraits (user images) ====== */
 const IMG_MAX=150;
@@ -1384,7 +1416,7 @@ function nextScene(){
   if(o.hearts)heartsFx(o.hearts);
   const btns=o.btns||[{l:'OK',p:1,f:()=>{}}];
   el.innerHTML=`<div class="back scene"><div class="sheet" role="dialog" aria-modal="true">
-   ${o.whoList&&o.whoList.length?`<div class="whol">${o.whoList.map(x=>avatar(x,40)).join('')}</div>`:''}<div class="row" style="margin-bottom:6px">${o.who?avatar(o.who,64):''}<h2 style="margin:0" class="grow">${esc(o.title||'')}</h2></div>
+   ${o.img?`<img class="evimg" src="${esc(o.img)}" alt="" data-fb="${esc(o.img0||'')}" onerror="if(this.dataset.fb&&this.src.indexOf(this.dataset.fb)<0){this.src=this.dataset.fb}else{this.remove()}">`:''}${o.whoList&&o.whoList.length?`<div class="whol">${o.whoList.map(x=>avatar(x,40)).join('')}</div>`:''}<div class="row" style="margin-bottom:6px">${o.who?avatar(o.who,64):''}<h2 style="margin:0" class="grow">${esc(o.title||'')}</h2></div>
    <div class="say fresh">${nl(o.html||'')}</div>
    <div class="row" style="justify-content:flex-end;margin-top:10px">${btns.map((b,i)=>`<button class="btn ${b.p?'primary':''}" data-a="sceneBtn" data-i="${i}">${esc(b.l)}</button>`).join('')}</div></div></div>`;
   const f=el.querySelector('.btn.primary')||el.querySelector('.btn');if(f)f.focus();
@@ -1483,7 +1515,7 @@ function tabHome(){
   const pj=S.proj.map(projCard).join('')||`<div class="card mute sm">開発中のプロジェクトはありません。<a href="#" data-a="tab" data-t="dev" class="rose">開発タブ</a>から始めよう。</div>`;
   const r=recs();
   const tm=tierOf()>=1&&TIER_MOOD[tierOf()]?`<div class="card hl sm">${esc(TIER_MOOD[tierOf()])}</div>`:'';
-  const top=`<div class="row sp"><span class="row" style="gap:6px"><button class="btn small" data-a="cheat">＋1000万円</button><button class="btn small primary" data-a="shopOpen">🛒 ショップ</button></span><button class="btn small" data-a="ambToggle" aria-pressed="${G.amb}">背景演出：${G.amb?'ON':'OFF'}</button></div>`;
+  const top=`<div class="row sp"><span class="row" style="gap:6px"><button class="btn small primary" data-a="shopOpen">🛒 ショップ</button></span><button class="btn small" data-a="ambToggle" aria-pressed="${G.amb}">背景演出：${G.amb?'ON':'OFF'}</button></div>`;
   return`<div class="stack">${top}${t}${tm}${greetCard()}${invCard()}${chatCard()}
   <div class="card"><h3>今週のひとこと</h3><div class="sm" style="display:grid;gap:3px">${r.length?r.map(x=>`<div>・${esc(x)}</div>`).join(''):'<div class="mute">やることは一通り済んでいます。次の週へ進みましょう。</div>'}</div></div>
   <h2>開発中</h2>${pj}
@@ -1773,7 +1805,6 @@ document.addEventListener('click',ev=>{
     case 'shopBuy':shopBuy(d.id);break;
     case 'potionPick':showModal(potionHtml);break;
     case 'potionUse':closeModal();usePotion(+d.id);break;
-    case 'cheat':S.money+=10000000;save();render();toast('＋1000万円');break;
     case 'ambToggle':G.amb=!G.amb;try{localStorage.setItem('dps-amb',G.amb?'1':'0')}catch(e){}render();break;
     case 'almOpen':showModal(()=>`<div class="row sp"><h2 style="margin:0">📖 ハーレム年鑑</h2><button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div><div class="stack" style="margin-top:10px">${S.almanac.map(r=>`<div class="card"><h3>${r.y}年目</h3><div class="sm" style="white-space:pre-wrap">${esc(almText(r))}</div></div>`).join('')}</div>`);break;
     case 'chatAll':showModal(()=>`<div class="row sp"><h2 style="margin:0">💬 社内チャット</h2><button class="btn small" data-a="closeModal" aria-label="閉じる">✕</button></div><div class="chat" style="margin-top:10px">${S.chat.filter(c=>empById(c.id)).slice(0,60).reverse().map(chatRow).join('')||'<span class="mute sm">まだ会話がありません。</span>'}</div>`);break;
