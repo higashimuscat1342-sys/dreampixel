@@ -2,7 +2,7 @@
 // index.html / message.html は「ネット優先」（更新したらすぐ反映・オフラインでは保存分を使用）。
 // 顔画像（jpg）は「保存分を先に表示→裏で更新」。
 const VER='dps-v1';
-const CORE=['./','index.html','message.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['./','index.html','message.html','event.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(VER).then(c=>Promise.all(CORE.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()));
 });
